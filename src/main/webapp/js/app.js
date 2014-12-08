@@ -15,7 +15,12 @@
     // model
     var Contact = Backbone.Model.extend({
         defaults: {
-            photo: "img/placeholder.png"
+            photo: "img/placeholder.png",
+            name: "",
+            address: "",
+            tel: "",
+            email: "",
+            type: ""
         }
     });
 
@@ -35,6 +40,23 @@
 
             this.$el.html(tmpl(this.model.toJSON()));
             return this; // enable chaining
+        },
+
+        events: {
+            "click button.delete": "deleteContact"
+        },
+
+        deleteContact: function () {
+            var removedType = this.model.get("type").toLowerCase();
+
+            this.model.destroy();
+
+            this.remove();
+
+            if (_.indexOf(directory.getTypes(), removedType) === -1) {
+                directory.$el.find("#filter select").children("[value='" + removedType + "']").remove();
+                //contactTypeSelect.children("[value='" + removedType + "']").remove();
+            }
         }
     });
 
@@ -55,6 +77,8 @@
 
             this.on("change:filterType", this.filterByType, this); // arbitrary change event for an undefined 'this.filterType' variable
             this.collection.on("reset", this.render, this);        // bind the render method to the collection.onReset event
+            this.collection.on("add", this.renderContact, this);
+            this.collection.on("remove", this.removeContact, this);
         },
 
         render: function () {
@@ -76,7 +100,14 @@
         },
 
         getTypes: function () {
-            return _.uniq(this.collection.pluck("type"));
+            var types = _.uniq(this.collection.pluck("type"), false, function (type) {
+                return type.toLowerCase();
+            });
+            _.each(types, function(value, key){
+                types[key] = value.toLowerCase();
+            });
+            console.log("returning types with %s", JSON.stringify(types));
+            return types;
         },
 
         createSelect: function () {
@@ -94,7 +125,9 @@
         },
 
         events: {
-            "change #filter select": "setFilter" // select onChange event
+            "change #filter select": "setFilter", // select onChange event
+            "click #add": "addContact",
+            "click #showForm": "showForm"
         },
 
         setFilter: function (e) {
@@ -122,7 +155,7 @@
 
                 // new version
                 var filtered = _.filter(contacts, function(item){
-                    return filterType === item.type;
+                    return filterType === item.type.toLowerCase();
                 });
                 this.collection.reset(filtered);
                 contactsRouter.navigate("filter/" + filterType);
@@ -134,8 +167,49 @@
             if ( contactTypeSelect.val() !== filterType) {
                 contactTypeSelect.val(filterType);
             }
-        }
+        },
 
+        addContact: function (e) {
+            e.preventDefault();
+
+            var newModel = {};
+            $("#addContact").children("input").each(function (i, el) {
+                if ($(el).val() !== "") {
+                    newModel[el.id] = $(el).val();
+                }
+            });
+
+            var formData = newModel;
+            contacts.push(formData);
+
+            var typeLower = formData.type.toLowerCase();
+            if (_.indexOf(this.getTypes(), typeLower) === -1) {
+                this.collection.add(new Contact(formData));
+                contactTypeSelect = this.createSelect();
+                this.$el.find("#filter").find("select").remove().end().append(contactTypeSelect);
+            } else {
+                this.collection.add(new Contact(formData));
+            }
+
+        },
+
+        removeContact: function (removedModel) {
+            var removed = removedModel.attributes;
+
+            if (removed.photo === Contact.prototype.defaults['photo']) {
+                delete removed.photo;
+            }
+
+            _.each(contacts, function (contact) {
+                if (_.isEqual(contact, removed)) {
+                    contacts.splice(_.indexOf(contacts, contact), 1);
+                }
+            });
+        },
+
+        showForm: function () {
+            this.$el.find("#addContact").slideToggle();
+        }
     });
 
     var ContactsRouter = Backbone.Router.extend({

@@ -10,7 +10,17 @@
 <div id="contacts">
     <header>
         <div id="filter"><label>Show me:</label></div>
+        <a id="showForm" href="#">Add new contact</a>
     </header>
+    <form id="addContact" action="#" hidden>
+        <label for="photo">photo:</label><input id="photo" type="file" />
+        <label for="type">Type:</label><input id="type" />
+        <label for="name">Name:</label><input id="name" />
+        <label for="address">Address:</label><input id="address" />
+        <label for="tel">Tel:</label><input id="tel" />
+        <label for="email">Email:</label><input id="email" />
+        <button id="add">Add</button>
+    </form>
 </div>
 <script id="contactTemplate" type="text/template">
     <img src="<%= photo %>" alt="<%= name %>" />
@@ -20,6 +30,7 @@
         <dt>Tel:</dt><dd><%= tel %></dd>
         <dt>Email:</dt><dd><a href="mailto:<%= email %>"><%= email %></a></dd>
     </dl>
+    <button class="delete">Delete</button>
 </script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/json2/20140204/json2.min.js"></script>
