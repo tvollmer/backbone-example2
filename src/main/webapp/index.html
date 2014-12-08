@@ -31,6 +31,19 @@
         <dt>Email:</dt><dd><a href="mailto:<%= email %>"><%= email %></a></dd>
     </dl>
     <button class="delete">Delete</button>
+    <button class="edit">Edit</button>
+</script>
+<script id="contactEditTemplate" type="text/template">
+    <form action="#">
+        <input type="file" value="<%= photo %>" />
+        <input class="name" value="<%= name %>" />
+        <input id="type" type="hidden" value="<%= type %>" />
+        <input class="address" value="<%= address %>" />
+        <input class="tel" value="<%= tel %>" />
+        <input class="email" value="<%= email %>" />
+        <button class="save">Save</button>
+        <button class="cancel">Cancel</button>
+    </form>
 </script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/json2/20140204/json2.min.js"></script>
