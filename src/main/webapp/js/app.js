@@ -26,8 +26,32 @@
 
     // collection
     var Directory = Backbone.Collection.extend({
-        model: Contact
+        model: Contact,
+        getTypes: function () {
+            var types = _.uniq(this.pluck("type"), false, function (type) {
+                return type.toLowerCase();
+            });
+            _.each(types, function(value, key){
+                types[key] = value.toLowerCase();
+            });
+
+            return types;
+        }
     });
+
+    var FormUtils = {
+        createSelectOfItems: function (items, options) {
+            var select = $("<select/>", options);
+
+            _.each(items, function (item) {
+                var option = $("<option/>", {
+                    value: item,
+                    text: item
+                }).appendTo(select);
+            });
+            return select;
+        }
+    };
 
     // individual model view
     var ContactView = Backbone.View.extend({
@@ -36,6 +60,10 @@
         template: $("#contactTemplate").html(),
         editTemplate: _.template($("#contactEditTemplate").html()),
 
+        initialize: function(options){
+//            AbstractView.prototype.initialize.apply(self, arguments);
+            this.theoptions = options
+        },
         render: function () {
             var tmpl = _.template(this.template);
 
@@ -72,8 +100,9 @@
                     value: "addType"
                 });
 
-            this.select = directory.createSelect().addClass("type")
-                .val(this.$el.find("#type").val()).append(newOpt)
+            var selectedTypeVal = this.$el.find("#type").val().toLowerCase();
+            this.select = this.theoptions.selectOfTypes.addClass("type")
+                .val(selectedTypeVal).append(newOpt)
                 .insertAfter(this.$el.find(".name"));
 
             this.$el.find("input[type='hidden']").remove();
@@ -112,6 +141,7 @@
 
         cancelEdit: function () {
             this.render(); // somehow reverts previously saved edits ( use case : edit, change, save, edit, cancel )
+            // use case #2 : edit contact #1, edit contact #2, click cancel for contact #2; causes collection.onReset to fire which re-renders DirectoryView
         },
 
         addType: function(){
@@ -137,7 +167,8 @@
             this.collection = new Directory(contacts);
 //            this.render(); // don't need this anymore, the router/framework will invoke the render method
 
-            contactTypeSelect = this.createSelect();
+            var items = this.collection.getTypes();
+            contactTypeSelect = FormUtils.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
             this.$el.find("#filter").append(contactTypeSelect);
 
             this.on("change:filterType", this.filterByType, this); // arbitrary change event for an undefined 'this.filterType' variable
@@ -148,7 +179,6 @@
 
         render: function () {
             var self = this;
-
             this.$el.find("article").remove(); // removes all of the objects/child-views with a tagName of 'article', ... which is all of our ContactView instances
 
             _.each(this.collection.models, function (item) {
@@ -158,35 +188,13 @@
         },
 
         renderContact: function (item) {
+            var items = this.collection.getTypes();
+            var selectOfTypes = FormUtils.createSelectOfItems(items);
             var contactView = new ContactView({
-                model: item
+                model: item,
+                selectOfTypes: selectOfTypes
             });
             this.$el.append(contactView.render().el);
-        },
-
-        getTypes: function () {
-            var types = _.uniq(this.collection.pluck("type"), false, function (type) {
-                return type.toLowerCase();
-            });
-            _.each(types, function(value, key){
-                types[key] = value.toLowerCase();
-            });
-
-            return types;
-        },
-
-        createSelect: function () {
-            var select = $("<select/>", {
-                    html: "<option value='all'>All</option>"
-                });
-
-            _.each(this.getTypes(), function (item) {
-                var option = $("<option/>", {
-                    value: item,
-                    text: item
-                }).appendTo(select);
-            });
-            return select;
         },
 
         events: {
@@ -247,9 +255,10 @@
             contacts.push(formData);
 
             var typeLower = formData.type.toLowerCase();
-            if (_.indexOf(this.getTypes(), typeLower) === -1) {
+            if (_.indexOf(this.collection.getTypes(), typeLower) === -1) {
                 this.collection.add(new Contact(formData));
-                contactTypeSelect = this.createSelect();
+                var items = this.collection.getTypes();
+                contactTypeSelect = FormUtils.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
                 this.$el.find("#filter").find("select").remove().end().append(contactTypeSelect);
             } else {
                 this.collection.add(new Contact(formData));
