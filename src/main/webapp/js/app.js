@@ -78,19 +78,19 @@ define(function(require){
         },
 
         events: {
-            "click button.delete": "deleteContact",
-            "click button.edit": "editContact",
-            "change select.type": "addType",
-            "click button.save": "saveEdits",
-            "click button.cancel": "cancelEdit"
+            "click button.delete": "deleteContactClickHandler",
+            "click button.edit": "editContactClickHandler",
+            "click button.save": "saveEditsClickHandler",
+            "click button.cancel": "cancelEditClickHandler",
+            "change select.type": "addTypeChangeUIHandler"
         },
 
-        deleteContact: function () {
+        deleteContactClickHandler: function (event) {
             this.model.destroy();
             this.remove();
         },
 
-        editContact: function () {
+        editContactClickHandler: function (event) {
             this.$el.html(this.editTemplate(this.model.toJSON()));
 
             var newOpt = $("<option/>", {
@@ -106,8 +106,8 @@ define(function(require){
             this.$el.find("input[type='hidden']").remove();
         },
 
-        saveEdits: function (e) {
-            e.preventDefault();
+        saveEditsClickHandler: function (event) {
+            event.preventDefault();
 
             var formData = {},
                 prev = this.model.previousAttributes();
@@ -137,12 +137,12 @@ define(function(require){
             });
         },
 
-        cancelEdit: function () {
+        cancelEditClickHandler: function (event) {
             this.render(); // somehow reverts previously saved edits ( use case : edit, change, save, edit, cancel )
             // use case #2 : edit contact #1, edit contact #2, click cancel for contact #2; causes collection.onReset to fire which re-renders DirectoryView
         },
 
-        addType: function(){
+        addTypeChangeUIHandler: function(event){
             if (this.select.val() === "addType") {
                 this.select.remove();
 
@@ -163,18 +163,25 @@ define(function(require){
 
         initialize: function (options) {
             this.collection = options.directory;
-//            this.render(); // don't need this anymore, the router/framework will invoke the render method
 
-            this.collection.on("reset", this.render, this);        // bind the render method to the collection.onReset event
-            this.collection.on("add", this.renderContact, this);
-            this.collection.on("remove", this.removeContact, this);
+            this.collection.on("reset", this.collectionResetDataHandler, this);        // bind the render method to the collection.onReset event
+            this.collection.on("add", this.colletionAddDataHandler, this);
+            this.collection.on("remove", this.collectionRemoveDataHandler, this);
 
             this.renderContactTypeSelect();
         },
 
+        collectionResetDataHandler: function(e){
+            this.render(e);
+        },
+
+        colletionAddDataHandler: function(addedModel){
+            this.renderContact(addedModel)
+        },
+
         render: function () {
             var self = this;
-            this.$el.find("article").remove(); // removes all of the objects/child-views with a tagName of 'article', ... which is all of our ContactView instances
+            this.$el.find("article").remove();
 
             _.each(this.collection.models, function (item) {
                 self.renderContact(item);
@@ -183,11 +190,11 @@ define(function(require){
             return this;
         },
 
-        renderContact: function (item) {
+        renderContact: function (contactModel) {
             var items = this.collection.getTypes();
             var selectOfTypes = forms.createSelectOfItems(items);
             var contactView = new ContactView({
-                model: item,
+                model: contactModel,
                 selectOfTypes: selectOfTypes
             });
             this.$el.append(contactView.render().el);
@@ -205,14 +212,19 @@ define(function(require){
 
         events: {
             "change #filter select": "setFilter", // select onChange event
-            "click #add": "addContact",
-            "click #showForm": "showForm",
-            "change #filterType": "filterByType"
+            "click #add": "addContactButtonClickHandler",
+            "click #showForm": "showFormClickUIHandler",
+            "change #filterType": "filterTypeChangeUIHandler"
         },
 
         setFilter: function (e) {
-            this.filterType = e.currentTarget.value;
+            this._filterType = e.currentTarget.value;
             this.trigger("change:filterType");
+        },
+
+        filterTypeChangeUIHandler: function(e){
+            var self = this;
+            self.filterByType();
         },
 
         /**
@@ -220,7 +232,7 @@ define(function(require){
          */
         filterByType: function () {
             var self = this;
-            var filterType = this.filterType;
+            var filterType = this._filterType;
             if (filterType === "all") {
                 this.collection.reset(contacts);
                 contactsRouter.navigate("filter/all"); // I don't know why our view would have a reference to the router; we're changing a select & presentation, not really going to a new location
@@ -250,7 +262,7 @@ define(function(require){
             }
         },
 
-        addContact: function (e) {
+        addContactButtonClickHandler: function (e) {
             e.preventDefault();
 
             var formData = {};
@@ -272,7 +284,7 @@ define(function(require){
 
         },
 
-        removeContact: function (removedModel) {
+        collectionRemoveDataHandler: function (removedModel) {
             var self = this;
             var removed = removedModel.attributes;
             var removedType = removed.type.toLowerCase();
@@ -293,7 +305,7 @@ define(function(require){
             }
         },
 
-        showForm: function (e) {
+        showFormClickUIHandler: function (e) {
             e.preventDefault();
             this.$el.find("#addContact").slideToggle();
         }
