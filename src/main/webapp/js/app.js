@@ -224,15 +224,15 @@ define(function(require){
 
         filterTypeChangeUIHandler: function(e){
             var self = this;
-            self.filterByType();
+            var filterType = self._filterType;
+            self.filterByType(filterType);
         },
 
         /**
          * resets collection, changes router state, and ensures that we have the correct state within the select
          */
-        filterByType: function () {
+        filterByType: function (filterType) {
             var self = this;
-            var filterType = this._filterType;
             if (filterType === "all") {
                 this.collection.reset(contacts);
                 contactsRouter.navigate("filter/all"); // I don't know why our view would have a reference to the router; we're changing a select & presentation, not really going to a new location
@@ -307,7 +307,13 @@ define(function(require){
 
         showFormClickUIHandler: function (e) {
             e.preventDefault();
-            this.$el.find("#addContact").slideToggle();
+            var self = this;
+            var addContactForm = this.$el.find("#addContact");
+            if ( !self.formIsVisible ){
+                addContactForm.slideToggle(function(){
+                    self.formIsVisible = true;
+                });
+            }
         }
     });
 
@@ -324,8 +330,7 @@ define(function(require){
         },
 
         urlFilter: function (type) {
-            directoryView.filterType = type;
-            directoryView.filterByType();
+            directoryView.filterByType(type);
         },
 
         /**
