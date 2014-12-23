@@ -173,8 +173,8 @@ define(function(require){
             this.collection = options.directory;
 //            this.render(); // don't need this anymore, the router/framework will invoke the render method
 
-            var items = this.collection.getTypes();
-            contactTypeSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
+
+            this.renderContactTypeSelect();
             this.$el.find("#filter").append(contactTypeSelect);
 
             this.on("change:filterType", this.filterByType, this); // arbitrary change event for an undefined 'this.filterType' variable
@@ -203,6 +203,11 @@ define(function(require){
                 selectOfTypes: selectOfTypes
             });
             this.$el.append(contactView.render().el);
+        },
+
+        renderContactTypeSelect: function(){
+            var items = this.collection.getTypes();
+            contactTypeSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
         },
 
         events: {
@@ -265,8 +270,7 @@ define(function(require){
             var typeLower = formData.type.toLowerCase();
             if (_.indexOf(this.collection.getTypes(), typeLower) === -1) {
                 this.collection.add(new Contact(formData));
-                var items = this.collection.getTypes();
-                contactTypeSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
+                this.renderContactTypeSelect();
                 this.$el.find("#filter").find("select").remove().end().append(contactTypeSelect);
             } else {
                 this.collection.add(new Contact(formData));
