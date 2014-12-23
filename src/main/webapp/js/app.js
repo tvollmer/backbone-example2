@@ -68,7 +68,7 @@ define(function(require){
 
         initialize: function(options){
 //            AbstractView.prototype.initialize.apply(self, arguments);
-            this.theoptions = options
+            this.theoptions = options;
         },
         render: function () {
             var tmpl = _.template(this.template);
@@ -86,16 +86,8 @@ define(function(require){
         },
 
         deleteContact: function () {
-            var removedType = this.model.get("type").toLowerCase();
-
             this.model.destroy();
-
             this.remove();
-
-            if (_.indexOf(directory.getTypes(), removedType) === -1) {
-                directory.$el.find("#filter select").children("[value='" + removedType + "']").remove();
-                //contactTypeSelect.children("[value='" + removedType + "']").remove();
-            }
         },
 
         editContact: function () {
@@ -279,7 +271,9 @@ define(function(require){
         },
 
         removeContact: function (removedModel) {
+            console.log("a contact was removed.");
             var removed = removedModel.attributes;
+            var removedType = removed.type.toLowerCase();
 
             if (removed.photo === Contact.prototype.defaults['photo']) {
                 delete removed.photo;
@@ -290,9 +284,15 @@ define(function(require){
                     contacts.splice(_.indexOf(contacts, contact), 1);
                 }
             });
+
+            if (_.indexOf(this.collection.getTypes(), removedType) === -1) {
+                contactTypeSelect.children("[value='" + removedType + "']").remove();
+                contactTypeSelect.val('all').trigger('change');
+            }
         },
 
-        showForm: function () {
+        showForm: function (e) {
+            e.preventDefault();
             this.$el.find("#addContact").slideToggle();
         }
     });
