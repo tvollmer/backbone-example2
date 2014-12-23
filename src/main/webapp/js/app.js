@@ -169,8 +169,8 @@ define(function(require){
         el: $("#contacts"), // set el once, and then you can get it a cached jquery reference with this.$el
         contactTypeSelect: null,
 
-        initialize: function () {
-            this.collection = new Directory(contacts);
+        initialize: function (options) {
+            this.collection = options.directory;
 //            this.render(); // don't need this anymore, the router/framework will invoke the render method
 
             var items = this.collection.getTypes();
@@ -190,6 +190,8 @@ define(function(require){
             _.each(this.collection.models, function (item) {
                 self.renderContact(item);
             }, this);
+
+
             return this;
         },
 
@@ -298,9 +300,14 @@ define(function(require){
             "*path": 'defaultRoute'
         },
 
+        initialize: function(options){
+            var self = this;
+            self.directoryView = options.directoryView
+        },
+
         urlFilter: function (type) {
-            directory.filterType = type;
-            directory.trigger("change:filterType");
+            directoryView.filterType = type;
+            directoryView.trigger("change:filterType");
         },
 
         /**
@@ -312,8 +319,9 @@ define(function(require){
     });
 
     // create an instance of the master view [ let's get this party started!!! ]
-    var directory = new DirectoryView();
-    var contactsRouter = new ContactsRouter();
+    var directory = new Directory(contacts);
+    var directoryView = new DirectoryView({directory:directory});
+    var contactsRouter = new ContactsRouter({directoryView:directoryView});
 
     Backbone.history.start();
 

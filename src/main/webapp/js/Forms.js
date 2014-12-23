@@ -1,5 +1,6 @@
 define(function (require) {
     var _ = require("underscore");
+    var $ = require("jquery");
 
     function Forms(options) {
         var self = this;
