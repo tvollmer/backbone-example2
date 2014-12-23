@@ -28,12 +28,16 @@ define(function (require) {
         var select = $("<select/>", options);
 
         _.each(items, function (item) {
-            var option = $("<option/>", {
-                value: item,
-                text: item
-            }).appendTo(select);
+            Forms.prototype.createOption(item).appendTo(select);
         });
         return select;
+    };
+
+    prototype.createOption = function(item){
+        return $("<option/>", {
+            value: item,
+            text: item
+        });
     };
 
     return Forms;

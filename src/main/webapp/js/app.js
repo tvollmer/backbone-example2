@@ -110,9 +110,9 @@ define(function(require){
             event.preventDefault();
 
             var formData = {},
-                prev = this.model.previousAttributes();
+                prev = this.model.previousAttributes();  // FIXME : undefined, and changes don't seem to stick around.
 
-            $(e.target).closest("form").find(":input").add(".photo").each(function () {
+            $(event.target).closest("form").find(":input").add(".photo").each(function () {
 
                 var el = $(this);
                 formData[el.attr("class")] = el.val();
@@ -264,6 +264,7 @@ define(function(require){
 
         addContactButtonClickHandler: function (e) {
             e.preventDefault();
+            var self = this;
 
             var formData = {};
             $("#addContact").children("input").each(function (i, el) {
@@ -277,7 +278,7 @@ define(function(require){
             var typeLower = formData.type.toLowerCase();
             if (_.indexOf(this.collection.getTypes(), typeLower) === -1) {
                 this.collection.add(new Contact(formData));
-                this.renderContactTypeSelect();
+                Forms.prototype.createOption(typeLower).appendTo(self.contactTypeSelect)
             } else {
                 this.collection.add(new Contact(formData));
             }
