@@ -1,4 +1,24 @@
-(function ($) {
+requirejs.config({
+//    baseUrl: 'js/lib',
+//    paths: {
+//        app: '../app'
+//    },
+    paths: {
+        "jquery": "//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min",
+        "json2": "//cdnjs.cloudflare.com/ajax/libs/json2/20140204/json2.min",
+        "underscore": "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min",
+        "backbone": "//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone"
+    }
+});
+
+
+define(function(require){
+
+    var $ = require("jquery");
+    var _ = require("underscore");
+    var Backbone = require("backbone");
+    var FormUtils = require("Forms");
+    var forms = new FormUtils();
 
     // demo data
     var contacts = [
@@ -38,20 +58,6 @@
             return types;
         }
     });
-
-    var FormUtils = {
-        createSelectOfItems: function (items, options) {
-            var select = $("<select/>", options);
-
-            _.each(items, function (item) {
-                var option = $("<option/>", {
-                    value: item,
-                    text: item
-                }).appendTo(select);
-            });
-            return select;
-        }
-    };
 
     // individual model view
     var ContactView = Backbone.View.extend({
@@ -168,7 +174,7 @@
 //            this.render(); // don't need this anymore, the router/framework will invoke the render method
 
             var items = this.collection.getTypes();
-            contactTypeSelect = FormUtils.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
+            contactTypeSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
             this.$el.find("#filter").append(contactTypeSelect);
 
             this.on("change:filterType", this.filterByType, this); // arbitrary change event for an undefined 'this.filterType' variable
@@ -189,7 +195,7 @@
 
         renderContact: function (item) {
             var items = this.collection.getTypes();
-            var selectOfTypes = FormUtils.createSelectOfItems(items);
+            var selectOfTypes = forms.createSelectOfItems(items);
             var contactView = new ContactView({
                 model: item,
                 selectOfTypes: selectOfTypes
@@ -258,7 +264,7 @@
             if (_.indexOf(this.collection.getTypes(), typeLower) === -1) {
                 this.collection.add(new Contact(formData));
                 var items = this.collection.getTypes();
-                contactTypeSelect = FormUtils.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
+                contactTypeSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
                 this.$el.find("#filter").find("select").remove().end().append(contactTypeSelect);
             } else {
                 this.collection.add(new Contact(formData));
@@ -311,4 +317,4 @@
 
     Backbone.history.start();
 
-} (jQuery));
+});
