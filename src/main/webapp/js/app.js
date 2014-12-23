@@ -159,20 +159,17 @@ define(function(require){
      */
     var DirectoryView = Backbone.View.extend({
         el: $("#contacts"), // set el once, and then you can get it a cached jquery reference with this.$el
-        contactTypeSelect: null,
+        contactTypeSelect: $("#filterType"),
 
         initialize: function (options) {
             this.collection = options.directory;
 //            this.render(); // don't need this anymore, the router/framework will invoke the render method
 
-
-            this.renderContactTypeSelect();
-            this.$el.find("#filter").append(contactTypeSelect);
-
-            this.on("change:filterType", this.filterByType, this); // arbitrary change event for an undefined 'this.filterType' variable
             this.collection.on("reset", this.render, this);        // bind the render method to the collection.onReset event
             this.collection.on("add", this.renderContact, this);
             this.collection.on("remove", this.removeContact, this);
+
+            this.renderContactTypeSelect();
         },
 
         render: function () {
@@ -182,7 +179,6 @@ define(function(require){
             _.each(this.collection.models, function (item) {
                 self.renderContact(item);
             }, this);
-
 
             return this;
         },
@@ -198,14 +194,20 @@ define(function(require){
         },
 
         renderContactTypeSelect: function(){
+            var self = this;
             var items = this.collection.getTypes();
-            contactTypeSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
+            var tmpSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
+            self.contactTypeSelect.find('option').remove();
+            _.each(tmpSelect.find('option'), function(option){
+                self.contactTypeSelect.append(option);
+            });
         },
 
         events: {
             "change #filter select": "setFilter", // select onChange event
             "click #add": "addContact",
-            "click #showForm": "showForm"
+            "click #showForm": "showForm",
+            "change #filterType": "filterByType"
         },
 
         setFilter: function (e) {
@@ -217,6 +219,7 @@ define(function(require){
          * resets collection, changes router state, and ensures that we have the correct state within the select
          */
         filterByType: function () {
+            var self = this;
             var filterType = this.filterType;
             if (filterType === "all") {
                 this.collection.reset(contacts);
@@ -242,8 +245,8 @@ define(function(require){
             /**
              * added to make sure that if someone uses the back-button, that the selected-value would match the presentation/view
              */
-            if ( contactTypeSelect.val() !== filterType) {
-                contactTypeSelect.val(filterType);
+            if ( self.contactTypeSelect.val() !== filterType) {
+                self.contactTypeSelect.val(filterType);
             }
         },
 
@@ -263,7 +266,6 @@ define(function(require){
             if (_.indexOf(this.collection.getTypes(), typeLower) === -1) {
                 this.collection.add(new Contact(formData));
                 this.renderContactTypeSelect();
-                this.$el.find("#filter").find("select").remove().end().append(contactTypeSelect);
             } else {
                 this.collection.add(new Contact(formData));
             }
@@ -271,7 +273,7 @@ define(function(require){
         },
 
         removeContact: function (removedModel) {
-            console.log("a contact was removed.");
+            var self = this;
             var removed = removedModel.attributes;
             var removedType = removed.type.toLowerCase();
 
@@ -286,8 +288,8 @@ define(function(require){
             });
 
             if (_.indexOf(this.collection.getTypes(), removedType) === -1) {
-                contactTypeSelect.children("[value='" + removedType + "']").remove();
-                contactTypeSelect.val('all').trigger('change');
+                self.contactTypeSelect.children("[value='" + removedType + "']").remove();
+                self.contactTypeSelect.val('all').trigger('change');
             }
         },
 
@@ -311,7 +313,7 @@ define(function(require){
 
         urlFilter: function (type) {
             directoryView.filterType = type;
-            directoryView.trigger("change:filterType");
+            directoryView.filterByType();
         },
 
         /**
