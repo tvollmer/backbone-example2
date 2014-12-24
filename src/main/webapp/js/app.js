@@ -110,11 +110,8 @@ define(function(require){
         saveEditsClickHandler: function (event) {
             event.preventDefault();
 
-            var formData = {},
-                prev = this.model.previousAttributes();  // FIXME : undefined, and changes don't seem to stick around.
-
+            var formData = {};
             $(event.target).closest("form").find(":input").add(".photo").each(function () {
-
                 var el = $(this);
                 formData[el.attr("class")] = el.val();
             });
@@ -124,6 +121,7 @@ define(function(require){
             }
 
             this.model.set(formData);
+            var prev = this.model.previousAttributes();
 
             this.render();
 
@@ -131,9 +129,10 @@ define(function(require){
                 delete prev.photo;
             }
 
-            _.each(contactsData, function (contact) {
+
+            _.each(contactsData, function (contact, index) {
                 if (_.isEqual(contact, prev)) {
-                    contactsData.splice(_.indexOf(contactsData, contact), 1, formData);
+                    contactsData.splice(index, 1, formData);
                 }
             });
         },
@@ -166,6 +165,8 @@ define(function(require){
         initialize: function (options) {
             this.viewableCollection = options.directory;
 
+            this.types = this.viewableCollection.getTypes();
+
             this.viewableCollection.on("reset", this.collectionResetDataHandler, this);
             this.viewableCollection.on("add", this.colletionAddDataHandler, this);
             this.viewableCollection.on("remove", this.collectionRemoveDataHandler, this);
@@ -185,19 +186,17 @@ define(function(require){
             var self = this;
             // TODO: can be optimized to reduce redraws ( ie. create the new views, remove the old, and append them all at once [not in a loop] )
             this.$el.find("article").remove();
-            // FIXME : when getting the list of all allowable types, we should not be pulling from the viewableCollection, but rather the full collection
-            var types = this.viewableCollection.getTypes();
 
             _.each(this.viewableCollection.models, function (item) {
-                self.renderContact(item, types);
+                self.renderContact(item, self.types);
             }, this);
 
             return this;
         },
 
         renderContact: function (contactModel, initialTypes) {
-            var types = initialTypes || this.viewableCollection.getTypes();
-            var selectOfTypes = forms.createSelectOfItems(types);
+            var self = this;
+            var selectOfTypes = forms.createSelectOfItems(self.types);
             var contactView = new ContactView({
                 model: contactModel,
                 selectOfTypes: selectOfTypes
@@ -210,8 +209,7 @@ define(function(require){
          */
         renderContactTypeSelect: function(){
             var self = this;
-            var items = this.viewableCollection.getTypes();
-            var options = forms.createOptions(items, ["<option value='all'>All</option>"]);
+            var options = forms.createOptions(self.types, ["<option value='all'>All</option>"]);
             self.contactTypeSelect.find('option').remove().end().append(options);
         },
 
@@ -269,8 +267,9 @@ define(function(require){
             contactsData.push(formData);
 
             var typeLower = formData.type.toLowerCase();
-            if (_.indexOf(this.viewableCollection.getTypes(), typeLower) === -1) {
+            if (_.indexOf(self.types, typeLower) === -1) {
                 this.viewableCollection.add(new Contact(formData));
+                self.types.push(typeLower);
                 forms.createOption(typeLower).appendTo(self.contactTypeSelect)
             } else {
                 this.viewableCollection.add(new Contact(formData));
@@ -293,7 +292,7 @@ define(function(require){
                 }
             });
 
-            if (_.indexOf(this.viewableCollection.getTypes(), removedType) === -1) {
+            if (_.indexOf(self.types, removedType) === -1) {
                 self.contactTypeSelect.children("[value='" + removedType + "']").remove();
                 self.contactTypeSelect.val('all').trigger('change');
             }
