@@ -21,7 +21,7 @@ define(function(require){
     var forms = new FormUtils();
 
     // demo data
-    var contacts = [
+    var contactsData = [
         { name: "Contact 1", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },
         { name: "Contact 2", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },
         { name: "Contact 3", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "friend" },
@@ -44,7 +44,7 @@ define(function(require){
         }
     });
 
-    // collection
+    // viewableCollection
     var Directory = Backbone.Collection.extend({
         model: Contact,
         getTypes: function () {
@@ -70,6 +70,7 @@ define(function(require){
 //            AbstractView.prototype.initialize.apply(self, arguments);
             this.theoptions = options;
         },
+
         render: function () {
             var tmpl = _.template(this.template);
 
@@ -130,16 +131,17 @@ define(function(require){
                 delete prev.photo;
             }
 
-            _.each(contacts, function (contact) {
+            _.each(contactsData, function (contact) {
                 if (_.isEqual(contact, prev)) {
-                    contacts.splice(_.indexOf(contacts, contact), 1, formData);
+                    contactsData.splice(_.indexOf(contactsData, contact), 1, formData);
                 }
             });
         },
 
         cancelEditClickHandler: function (event) {
+            event.preventDefault();
             this.render(); // somehow reverts previously saved edits ( use case : edit, change, save, edit, cancel )
-            // use case #2 : edit contact #1, edit contact #2, click cancel for contact #2; causes collection.onReset to fire which re-renders DirectoryView
+            // use case #2 : edit contact #1, edit contact #2, click cancel for contact #2; causes viewableCollection.onReset to fire which re-renders DirectoryView
         },
 
         addTypeChangeUIHandler: function(event){
@@ -162,11 +164,11 @@ define(function(require){
         contactTypeSelect: $("#filterType"),
 
         initialize: function (options) {
-            this.collection = options.directory;
+            this.viewableCollection = options.directory;
 
-            this.collection.on("reset", this.collectionResetDataHandler, this);
-            this.collection.on("add", this.colletionAddDataHandler, this);
-            this.collection.on("remove", this.collectionRemoveDataHandler, this);
+            this.viewableCollection.on("reset", this.collectionResetDataHandler, this);
+            this.viewableCollection.on("add", this.colletionAddDataHandler, this);
+            this.viewableCollection.on("remove", this.collectionRemoveDataHandler, this);
 
             this.renderContactTypeSelect();
         },
@@ -181,18 +183,21 @@ define(function(require){
 
         render: function () {
             var self = this;
+            // TODO: can be optimized to reduce redraws ( ie. create the new views, remove the old, and append them all at once [not in a loop] )
             this.$el.find("article").remove();
+            // FIXME : when getting the list of all allowable types, we should not be pulling from the viewableCollection, but rather the full collection
+            var types = this.viewableCollection.getTypes();
 
-            _.each(this.collection.models, function (item) {
-                self.renderContact(item);
+            _.each(this.viewableCollection.models, function (item) {
+                self.renderContact(item, types);
             }, this);
 
             return this;
         },
 
-        renderContact: function (contactModel) {
-            var items = this.collection.getTypes();
-            var selectOfTypes = forms.createSelectOfItems(items);
+        renderContact: function (contactModel, initialTypes) {
+            var types = initialTypes || this.viewableCollection.getTypes();
+            var selectOfTypes = forms.createSelectOfItems(types);
             var contactView = new ContactView({
                 model: contactModel,
                 selectOfTypes: selectOfTypes
@@ -200,9 +205,12 @@ define(function(require){
             this.$el.append(contactView.render().el);
         },
 
+        /**
+         * should only be called during initialization, or when reseting the viewableCollection to its broadest scope
+         */
         renderContactTypeSelect: function(){
             var self = this;
-            var items = this.collection.getTypes();
+            var items = this.viewableCollection.getTypes();
             var options = forms.createOptions(items, ["<option value='all'>All</option>"]);
             self.contactTypeSelect.find('option').remove().end().append(options);
         },
@@ -220,18 +228,21 @@ define(function(require){
         },
 
         /**
-         * resets collection, changes router state, and ensures that we have the correct state within the select
+         * resets viewable viewableCollection, changes router state, and ensures that we have the correct state within the select
+         *
+         * Honestly, this function feels more like Controller logic.
+         *
          */
         filterByType: function (filterType) {
             var self = this;
             if (filterType === "all") {
-                this.collection.reset(contacts);
+                this.viewableCollection.reset(contactsData);
                 contactsRouter.navigate("filter/all"); // I don't know why our view would have a reference to the router; we're changing a select & presentation, not really going to a new location
             } else {
-                var filtered = _.filter(contacts, function(item){
+                var filtered = _.filter(contactsData, function(item){
                     return filterType === item.type.toLowerCase();
                 });
-                this.collection.reset(filtered);
+                this.viewableCollection.reset(filtered);
                 contactsRouter.navigate("filter/" + filterType);
             }
 
@@ -254,14 +265,15 @@ define(function(require){
                 }
             });
 
-            contacts.push(formData);
+            // FIXME : this view already has access to the Directory, which has a referencey/copy of the main collection; this view shouldn't need direct access to the main collection
+            contactsData.push(formData);
 
             var typeLower = formData.type.toLowerCase();
-            if (_.indexOf(this.collection.getTypes(), typeLower) === -1) {
-                this.collection.add(new Contact(formData));
+            if (_.indexOf(this.viewableCollection.getTypes(), typeLower) === -1) {
+                this.viewableCollection.add(new Contact(formData));
                 forms.createOption(typeLower).appendTo(self.contactTypeSelect)
             } else {
-                this.collection.add(new Contact(formData));
+                this.viewableCollection.add(new Contact(formData));
             }
 
         },
@@ -275,13 +287,13 @@ define(function(require){
                 delete removed.photo;
             }
 
-            _.each(contacts, function (contact) {
+            _.each(contactsData, function (contact) {
                 if (_.isEqual(contact, removed)) {
-                    contacts.splice(_.indexOf(contacts, contact), 1);
+                    contactsData.splice(_.indexOf(contactsData, contact), 1);
                 }
             });
 
-            if (_.indexOf(this.collection.getTypes(), removedType) === -1) {
+            if (_.indexOf(this.viewableCollection.getTypes(), removedType) === -1) {
                 self.contactTypeSelect.children("[value='" + removedType + "']").remove();
                 self.contactTypeSelect.val('all').trigger('change');
             }
@@ -324,7 +336,7 @@ define(function(require){
     });
 
     // create an instance of the master view [ let's get this party started!!! ]
-    var directory = new Directory(contacts);
+    var directory = new Directory(contactsData);
     var directoryView = new DirectoryView({directory:directory});
     var contactsRouter = new ContactsRouter({directoryView:directoryView});
 

@@ -13,12 +13,12 @@ define(function (require) {
      * Creates a select that can later be added to the dom.
      *
      * EXAMPLE 1:
-     *   var items = this.collection.getTypes();
-     *   var contactTypeSelect = FormUtils.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
+     *   var items = getTypes();
+     *   var typeSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
      *
      * EXAMPLE 2:
-     *   var items = this.collection.getTypes();
-     *   var contactTypeSelect = FormUtils.createSelectOfItems(items);
+     *   var items = getTypes();
+     *   var typeSelect = forms.createSelectOfItems(items);
      *
      * @param items
      * @param [options]
@@ -35,19 +35,19 @@ define(function (require) {
      * Creates an array of options that can be appended to a DOM elem.
      *
      * EXAMPLE 1 ( provide initial array of string ):
-     *   var items = this.collection.getTypes();
+     *   var items = getTypes();
      *   var options = forms.createOptions(items, ["<option value='all'>All</option>"]);
-     *   self.contactTypeSelect.find('option').remove().end().append(options);
+     *   typeSelect.find('option').remove().end().append(options);
      *
      * EXAMPLE 2 ( provide and initial array of jQuery objects ):
-     *   var items = this.collection.getTypes();
+     *   var items = getTypes();
      *   var options = forms.createOptions(items, [$("<option/>", {value:"all",text:"All"})]);
-     *   self.contactTypeSelect.find('option').remove().end().append(options);
+     *   typeSelect.find('option').remove().end().append(options);
      *
      * EXAMPLE 3 ( no starting array ):
-     *   var items = this.collection.getTypes();
+     *   var items = getTypes();
      *   var options = forms.createOptions(items);
-     *   self.contactTypeSelect.find('option').remove().end().append(options);
+     *   typeSelect.find('option').remove().end().append(options);
      *
      * @param items
      * @param [initialOptionsArray]
