@@ -164,7 +164,7 @@ define(function(require){
         initialize: function (options) {
             this.collection = options.directory;
 
-            this.collection.on("reset", this.collectionResetDataHandler, this);        // bind the render method to the collection.onReset event
+            this.collection.on("reset", this.collectionResetDataHandler, this);
             this.collection.on("add", this.colletionAddDataHandler, this);
             this.collection.on("remove", this.collectionRemoveDataHandler, this);
 
@@ -211,20 +211,14 @@ define(function(require){
         },
 
         events: {
-            "change #filter select": "setFilter", // select onChange event
             "click #add": "addContactButtonClickHandler",
             "click #showForm": "showFormClickUIHandler",
             "change #filterType": "filterTypeChangeUIHandler"
         },
 
-        setFilter: function (e) {
-            this._filterType = e.currentTarget.value;
-            this.trigger("change:filterType");
-        },
-
         filterTypeChangeUIHandler: function(e){
             var self = this;
-            var filterType = self._filterType;
+            var filterType = e.currentTarget.value;
             self.filterByType(filterType);
         },
 
@@ -237,16 +231,6 @@ define(function(require){
                 this.collection.reset(contacts);
                 contactsRouter.navigate("filter/all"); // I don't know why our view would have a reference to the router; we're changing a select & presentation, not really going to a new location
             } else {
-                /*
-                // orig version
-                this.collection.reset(contacts, { silent: true }); // silent to keep from firing the this.collection.on("reset" event
-
-                var filtered = _.filter(this.collection.models, function (item) {
-                        return item.get("type") === filterType;
-                    });
-                */
-
-                // new version
                 var filtered = _.filter(contacts, function(item){
                     return filterType === item.type.toLowerCase();
                 });
@@ -278,7 +262,7 @@ define(function(require){
             var typeLower = formData.type.toLowerCase();
             if (_.indexOf(this.collection.getTypes(), typeLower) === -1) {
                 this.collection.add(new Contact(formData));
-                Forms.prototype.createOption(typeLower).appendTo(self.contactTypeSelect)
+                forms.createOption(typeLower).appendTo(self.contactTypeSelect)
             } else {
                 this.collection.add(new Contact(formData));
             }

@@ -28,7 +28,7 @@ define(function (require) {
         var select = $("<select/>", options);
 
         _.each(items, function (item) {
-            Forms.prototype.createOption(item).appendTo(select);
+            prototype.createOption(item).appendTo(select);
         });
         return select;
     };
