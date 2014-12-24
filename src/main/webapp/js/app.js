@@ -203,11 +203,8 @@ define(function(require){
         renderContactTypeSelect: function(){
             var self = this;
             var items = this.collection.getTypes();
-            var tmpSelect = forms.createSelectOfItems(items, {html: "<option value='all'>All</option>"});
-            self.contactTypeSelect.find('option').remove();
-            _.each(tmpSelect.find('option'), function(option){
-                self.contactTypeSelect.append(option);
-            });
+            var options = forms.createOptions(items, ["<option value='all'>All</option>"]);
+            self.contactTypeSelect.find('option').remove().end().append(options);
         },
 
         events: {
