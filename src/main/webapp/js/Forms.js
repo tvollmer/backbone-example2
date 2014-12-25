@@ -64,13 +64,14 @@ define(function (require) {
     /**
      * Creates a single option element/object.
      *
-     * @param item
+     * @param value
+     * @param [html]
      * @returns {*|jQuery|HTMLElement}
      */
-    prototype.createOption = function(item){
+    prototype.createOption = function(value, html){
         return $("<option/>", {
-            value: item,
-            text: item
+            value: value,
+            html: html || value
         });
     };
 

@@ -94,16 +94,12 @@ define(function(require){
         editContactClickHandler: function (event) {
             this.$el.html(this.editTemplate(this.model.toJSON()));
 
-            var newOpt = $("<option/>", {
-                    html: "<em>Add new...</em>",
-                    value: "addType"
-                });
-
             var nameElem = this.$el.find(".name");
             var typeElem = this.$el.find("#type");
             var selectedTypeVal = typeElem.val().toLowerCase();
             typeElem.remove();
 
+            var newOpt = forms.createOption("addType", "<em>Add new...</em>");
             this.cachedRefOfTypeSelect = this.selectOfTypes.clone().addClass("type")
                 .val(selectedTypeVal).append(newOpt)
                 .insertAfter(nameElem);
