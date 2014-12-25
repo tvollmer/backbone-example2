@@ -62,7 +62,7 @@ define(function (require) {
     };
 
     /**
-     * Creates a single option element/object.
+     * Creates a single option.
      *
      * @param value
      * @param [html]

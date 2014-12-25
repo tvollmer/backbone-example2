@@ -261,7 +261,7 @@ define(function(require){
                 }
             });
 
-            // FIXME : this view already has access to the Directory, which has a referencey/copy of the main collection; this view shouldn't need direct access to the main collection
+            // FIXME : this view already has access to the Directory, which has a reference/copy of the main collection; this view shouldn't need direct access to the main collection
             contactsData.push(formData);
 
             var typeLower = formData.type.toLowerCase();
