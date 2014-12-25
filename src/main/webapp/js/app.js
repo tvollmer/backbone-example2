@@ -68,7 +68,7 @@ define(function(require){
 
         initialize: function(options){
 //            AbstractView.prototype.initialize.apply(self, arguments);
-            this.theoptions = options;
+            this.selectOfTypes = options.selectOfTypes;
         },
 
         render: function () {
@@ -99,12 +99,14 @@ define(function(require){
                     value: "addType"
                 });
 
-            var selectedTypeVal = this.$el.find("#type").val().toLowerCase();
-            this.select = this.theoptions.selectOfTypes.addClass("type")
-                .val(selectedTypeVal).append(newOpt)
-                .insertAfter(this.$el.find(".name"));
+            var nameElem = this.$el.find(".name");
+            var typeElem = this.$el.find("#type");
+            var selectedTypeVal = typeElem.val().toLowerCase();
+            typeElem.remove();
 
-            this.$el.find("input[type='hidden']").remove();
+            this.cachedRefOfTypeSelect = this.selectOfTypes.clone().addClass("type")
+                .val(selectedTypeVal).append(newOpt)
+                .insertAfter(nameElem);
         },
 
         saveEditsClickHandler: function (event) {
@@ -144,8 +146,8 @@ define(function(require){
         },
 
         addTypeChangeUIHandler: function(event){
-            if (this.select.val() === "addType") {
-                this.select.remove();
+            if (this.cachedRefOfTypeSelect.val() === "addType") {
+                this.cachedRefOfTypeSelect.remove();
 
                 $("<input />", {
                     "class": "type"
