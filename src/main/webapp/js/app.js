@@ -66,6 +66,8 @@ define(function(require){
         template: $("#contactTemplate").html(),
         editTemplate: _.template($("#contactEditTemplate").html()),
 
+        // TODO : need to make the 'Type' field for addNewContact to work the same as it does in the editTemplate (dropdown+edit)
+        
         initialize: function(options){
 //            AbstractView.prototype.initialize.apply(self, arguments);
             this.selectOfTypes = options.selectOfTypes;
@@ -160,6 +162,7 @@ define(function(require){
     var DirectoryView = Backbone.View.extend({
         el: $("#contacts"), // set el once, and then you can get it a cached jquery reference with this.$el
         contactTypeSelect: $("#filterType"),
+        addNewContactInputs: $("#addContact").children("input"),
 
         initialize: function (options) {
             this.baseArray = options.baseArray;
@@ -258,21 +261,22 @@ define(function(require){
             var self = this;
 
             var formData = {};
-            $("#addContact").children("input").each(function (i, el) {
+            self.addNewContactInputs.each(function (i, el) {
                 if ($(el).val() !== "") {
                     formData[el.id] = $(el).val();
                 }
             });
 
             this.baseArray.push(formData);
+            var newContact = new Contact(formData);
 
             var typeLower = formData.type.toLowerCase();
             if (_.indexOf(self.types, typeLower) === -1) {
-                this.viewableCollection.add(new Contact(formData));
+                this.viewableCollection.add(newContact);
                 self.types.push(typeLower);
                 forms.createOption(typeLower).appendTo(self.contactTypeSelect)
             } else {
-                this.viewableCollection.add(new Contact(formData));
+                this.viewableCollection.add(newContact);
             }
 
         },
