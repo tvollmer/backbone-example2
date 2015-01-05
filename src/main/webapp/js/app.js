@@ -44,7 +44,7 @@ define(function(require){
         }
     });
 
-    // viewableCollection
+    // collection
     var Directory = Backbone.Collection.extend({
         model: Contact,
         getTypes: function () {
