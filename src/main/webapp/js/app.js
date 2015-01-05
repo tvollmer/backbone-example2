@@ -69,6 +69,7 @@ define(function(require){
         initialize: function(options){
 //            AbstractView.prototype.initialize.apply(self, arguments);
             this.selectOfTypes = options.selectOfTypes;
+            this.baseArray = options.baseArray;
         },
 
         render: function () {
@@ -127,10 +128,10 @@ define(function(require){
                 delete prev.photo;
             }
 
-
-            _.each(contactsData, function (contact, index) {
+            var self = this;
+            _.each(self.baseArray, function (contact, index) {
                 if (_.isEqual(contact, prev)) {
-                    contactsData.splice(index, 1, formData);
+                    self.baseArray.splice(index, 1, formData);
                 }
             });
         },
@@ -161,7 +162,8 @@ define(function(require){
         contactTypeSelect: $("#filterType"),
 
         initialize: function (options) {
-            this.viewableCollection = options.directory;
+            this.baseArray = options.baseArray;
+            this.viewableCollection = new Directory(this.baseArray);
 
             this.types = this.viewableCollection.getTypes();
 
@@ -197,7 +199,8 @@ define(function(require){
             var selectOfTypes = forms.createSelectOfItems(self.types);
             var contactView = new ContactView({
                 model: contactModel,
-                selectOfTypes: selectOfTypes
+                selectOfTypes: selectOfTypes,
+                baseArray: self.baseArray
             });
             this.$el.append(contactView.render().el);
         },
@@ -232,10 +235,10 @@ define(function(require){
         filterByType: function (filterType) {
             var self = this;
             if (filterType === "all") {
-                this.viewableCollection.reset(contactsData);
+                this.viewableCollection.reset(this.baseArray);
                 contactsRouter.navigate("filter/all"); // I don't know why our view would have a reference to the router; we're changing a select & presentation, not really going to a new location
             } else {
-                var filtered = _.filter(contactsData, function(item){
+                var filtered = _.filter(this.baseArray, function(item){
                     return filterType === item.type.toLowerCase();
                 });
                 this.viewableCollection.reset(filtered);
@@ -261,8 +264,7 @@ define(function(require){
                 }
             });
 
-            // FIXME : this view already has access to the Directory, which has a reference/copy of the main collection; this view shouldn't need direct access to the main collection
-            contactsData.push(formData);
+            this.baseArray.push(formData);
 
             var typeLower = formData.type.toLowerCase();
             if (_.indexOf(self.types, typeLower) === -1) {
@@ -284,13 +286,14 @@ define(function(require){
                 delete removed.photo;
             }
 
-            _.each(contactsData, function (contact) {
+            _.each(self.baseArray, function (contact, index) {
                 if (_.isEqual(contact, removed)) {
-                    contactsData.splice(_.indexOf(contactsData, contact), 1);
+                    self.baseArray.splice(index, 1);
                 }
             });
 
-            if (_.indexOf(self.types, removedType) === -1) {
+            var allTypes = new Directory(self.baseArray).getTypes();
+            if (_.indexOf(allTypes, removedType) === -1) {
                 self.contactTypeSelect.children("[value='" + removedType + "']").remove();
                 self.contactTypeSelect.val('all').trigger('change');
             }
@@ -333,8 +336,7 @@ define(function(require){
     });
 
     // create an instance of the master view [ let's get this party started!!! ]
-    var directory = new Directory(contactsData);
-    var directoryView = new DirectoryView({directory:directory});
+    var directoryView = new DirectoryView({baseArray:contactsData});
     var contactsRouter = new ContactsRouter({directoryView:directoryView});
 
     Backbone.history.start();
