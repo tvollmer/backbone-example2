@@ -95,6 +95,7 @@ define(function(require){
         },
 
         editContactClickHandler: function (event) {
+            // TODO : if you have multiple records in their Edit view, and you click save ( with a new type ), then it will be re-rendered, and your changes will be lost; one solution would be to only allow no more than 1 Contact to be in an Edit mode at a time.
             this.$el.html(this.editTemplate(this.model.toJSON()));
 
             var nameElem = this.$el.find(".name");
@@ -163,17 +164,18 @@ define(function(require){
         el: $("#contacts"), // set el once, and then you can get it a cached jquery reference with this.$el
         contactTypeSelect: $("#filterType"),
         addNewContactInputs: $("#addContact").children("input"),
+        childViews: [],
 
         initialize: function (options) {
             this.baseArray = options.baseArray;
             _.extend(this.baseArray, Backbone.Events);
-            this.baseArray.on("add", this.baseArrayAddDataHandler, this);
-            this.baseArray.on("remove", this.baseArrayRemoveDataHandler, this);
+            this.listenTo(this.baseArray, "add", this.baseArrayAddDataHandler);
+            this.listenTo(this.baseArray, "remove", this.baseArrayRemoveDataHandler);
 
             this.viewableCollection = new Directory(this.baseArray);
-            this.viewableCollection.on("reset", this.viewableCollectionResetDataHandler, this);
-            this.viewableCollection.on("add", this.viewableCollectionAddDataHandler, this);
-            this.viewableCollection.on("remove", this.viewableCollectionRemoveDataHandler, this);
+            this.listenTo(this.viewableCollection, "reset", this.viewableCollectionResetDataHandler);
+            this.listenTo(this.viewableCollection, "add", this.viewableCollectionAddDataHandler);
+            this.listenTo(this.viewableCollection, "remove", this.viewableCollectionRemoveDataHandler);
 
             this.renderContactTypeSelect();
         },
@@ -189,7 +191,10 @@ define(function(require){
         render: function () {
             var self = this;
             // TODO: can be optimized to reduce redraws ( ie. create the new views, remove the old, and append them all at once [not in a loop] )
-            this.$el.find("article").remove();
+            _.each(self.childViews, function(childView){
+                childView.remove();
+            });
+            self.childViews = [];
 
             _.each(this.viewableCollection.models, function (item) {
                 self.renderContact(item);
@@ -206,6 +211,7 @@ define(function(require){
                 selectOfTypes: selectOfTypes,
                 baseArray: self.baseArray
             });
+            self.childViews.push(contactView);
             this.$el.append(contactView.render().el);
         },
 
