@@ -185,7 +185,8 @@ define(function(require){
         },
 
         viewableCollectionAddDataHandler: function(addedModel){
-            this.renderContact(addedModel)
+            var self = this;
+            self.$el.append(self.renderContact(addedModel));
         },
 
         render: function () {
@@ -196,9 +197,11 @@ define(function(require){
             });
             self.childViews = [];
 
+            var container = document.createDocumentFragment();
             _.each(this.viewableCollection.models, function (item) {
-                self.renderContact(item);
+                container.appendChild(self.renderContact(item));
             }, this);
+            self.$el.append(container);
 
             return this;
         },
@@ -212,7 +215,7 @@ define(function(require){
                 baseArray: self.baseArray
             });
             self.childViews.push(contactView);
-            this.$el.append(contactView.render().el);
+            return contactView.render().el;
         },
 
         /**
