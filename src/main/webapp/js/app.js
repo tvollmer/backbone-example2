@@ -191,7 +191,7 @@ define(function(require){
 
         render: function () {
             var self = this;
-            // TODO: can be optimized to reduce redraws ( ie. create the new views, remove the old, and append them all at once [not in a loop] )
+            this.$el.find("article").remove();
             _.each(self.childViews, function(childView){
                 childView.remove();
             });
