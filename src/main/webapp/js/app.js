@@ -206,7 +206,6 @@ define(function(require){
                 selectOfTypes: selectOfTypes,
                 baseArray: self.baseArray
             });
-            self.childViews.push(contactView);
             this.$el.append(contactView.render().el);
         },
 
@@ -299,7 +298,7 @@ define(function(require){
             if (_.indexOf(self.types, typeLower) === -1) {
                 self.types.push(typeLower);
                 forms.createOption(typeLower).appendTo(self.contactTypeSelect)
-                // TODO: for each ContactView, add typeLower to it's select as well or re-render them.
+                self.render(); // for each viewable ContactView, add typeLower to it's select as well or re-render them.
             }
         },
 
@@ -309,8 +308,11 @@ define(function(require){
             var removedType = removedJson.type.toLowerCase();
             if (_.indexOf(allTypes, removedType) === -1) {
                 self.types = _.without(self.types, removedType); // prevents removedType from showing up in future Contact edit click/views
+                var isSelectedTypeEqualToRemovedType = self.contactTypeSelect.val() === removedType;
                 self.contactTypeSelect.children("[value='" + removedType + "']").remove();
-                self.contactTypeSelect.val('all').trigger('change');
+                if ( isSelectedTypeEqualToRemovedType ){
+                    self.contactTypeSelect.val('all').trigger('change');
+                }
             }
         },
 
