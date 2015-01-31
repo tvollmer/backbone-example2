@@ -19,18 +19,7 @@ define(function(require){
     var Backbone = require("backbone");
     var FormUtils = require("Forms");
     var forms = new FormUtils();
-
-    // demo data
-    var contactsData = [
-        { name: "Contact 1", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },
-        { name: "Contact 2", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },
-        { name: "Contact 3", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "friend" },
-        { name: "Contact 4", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "colleague" },
-        { name: "Contact 5", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" },
-        { name: "Contact 6", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "colleague" },
-        { name: "Contact 7", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "friend" },
-        { name: "Contact 8", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789", email: "anemail@me.com", type: "family" }
-    ];
+    var BASE_URL = 'http://localhost:8080/backbone-example/app/Contacts';
 
     // model
     var Contact = Backbone.Model.extend({
@@ -41,22 +30,14 @@ define(function(require){
             tel: "",
             email: "",
             type: ""
-        }
+        },
+        urlRoot: BASE_URL
     });
 
     // collection
     var Directory = Backbone.Collection.extend({
         model: Contact,
-        getTypes: function () {
-            var types = _.uniq(this.pluck("type"), false, function (type) {
-                return type.toLowerCase();
-            });
-            _.each(types, function(value, key){
-                types[key] = value.toLowerCase();
-            });
-
-            return types;
-        }
+        url: BASE_URL
     });
 
     // individual model view
@@ -71,14 +52,13 @@ define(function(require){
         initialize: function(options){
 //            AbstractView.prototype.initialize.apply(self, arguments);
             this.selectOfTypes = options.selectOfTypes;
-            this.baseArray = options.baseArray;
         },
 
         render: function () {
             var tmpl = _.template(this.template);
 
             this.$el.html(tmpl(this.model.toJSON()));
-            return this; // enable chaining
+            return this; // enable chai`ning
         },
 
         events: {
@@ -113,9 +93,14 @@ define(function(require){
             event.preventDefault();
 
             var formData = {};
-            $(event.target).closest("form").find(":input").add(".photo").each(function () {
-                var el = $(this);
-                formData[el.attr("class")] = el.val();
+            var theModel = this.model;
+            var theForm = $(event.target).closest("form");
+
+            _.each(Object.keys(theModel.attributes), function(attr, index){
+                var newVal = theForm.find("."+attr).val();
+                if ( undefined !== newVal ){
+                    formData[attr] = newVal;
+                }
             });
 
             if (formData.photo === "") {
@@ -124,19 +109,13 @@ define(function(require){
 
             this.model.set(formData);
             var prev = this.model.previousAttributes();
-
+            this.model.save();
             this.render();
 
             if (prev.photo === Contact.prototype.defaults['photo']) {
                 delete prev.photo;
             }
 
-            var self = this;
-            _.each(self.baseArray, function (contact, index) {
-                if (_.isEqual(contact, prev)) {
-                    self.baseArray.splice(index, 1, formData);
-                }
-            });
         },
 
         cancelEditClickHandler: function (event) {
@@ -165,67 +144,93 @@ define(function(require){
         contactTypeSelect: $("#filterType"),
         addNewContactInputs: $("#addContact").children("input"),
         childViews: [],
+        types: [],
 
         initialize: function (options) {
-            this.baseArray = options.baseArray;
-            _.extend(this.baseArray, Backbone.Events);
-            this.listenTo(this.baseArray, "add", this.baseArrayAddDataHandler);
-            this.listenTo(this.baseArray, "remove", this.baseArrayRemoveDataHandler);
-
-            this.viewableCollection = new Directory(this.baseArray);
-            this.listenTo(this.viewableCollection, "reset", this.viewableCollectionResetDataHandler);
-            this.listenTo(this.viewableCollection, "add", this.viewableCollectionAddDataHandler);
-            this.listenTo(this.viewableCollection, "remove", this.viewableCollectionRemoveDataHandler);
-
-            this.renderContactTypeSelect();
+            this.listenTo(this.collection, "reset", this.collectionResetDataHandler);
+            this.listenTo(this.collection, "add", this.collectionAddDataHandler);
+            this.listenTo(this.collection, "remove", this.collectionRemoveDataHandler);
         },
 
-        viewableCollectionResetDataHandler: function(e){
+        collectionResetDataHandler: function(e){
             this.render(e);
         },
 
-        viewableCollectionAddDataHandler: function(addedModel){
+        collectionAddDataHandler: function(addedModel){
             var self = this;
             self.$el.append(self.renderContact(addedModel));
+
+            var typeLower = addedModel.get('type').toLowerCase();
+            if (self.types.length !== 0 && _.indexOf(self.types, typeLower) === -1) {
+                self.types.push(typeLower);
+                forms.createOption(typeLower).appendTo(self.contactTypeSelect)
+                self.render(); // for each viewable ContactView, add typeLower to it's select as well or re-render them.
+            }
+        },
+
+        collectionRemoveDataHandler: function(removedModel){
+            var self = this;
+
+            var removed = removedModel.attributes;
+            if (removed.photo !== Contact.prototype.defaults['photo']) {
+                delete removed.photo;
+            }
         },
 
         render: function () {
             var self = this;
-            this.$el.find("article").remove();
+            self.renderContactTypeSelect();
+
+            return this;
+        },
+
+        renderContactTypeSelect: function(){
+            var self = this;
+            var currentFilterType = self.contactTypeSelect.val();
+
+            $.getJSON(BASE_URL+"/types")
+                .done(function(json){
+                    self.types = json;
+
+                    if ( null === currentFilterType ){
+                        var options = forms.createOptions(self.types, ["<option value='all'>All</option>"]);
+                        self.contactTypeSelect.find('option').remove().end().append(options);
+                        self.contactTypeSelect.val('all');
+                    } else if ( self.contactTypeSelect.val() !== currentFilterType) {
+                        self.contactTypeSelect.val(currentFilterType);
+                    }
+
+                    self.renderContacts();
+                });
+
+        },
+
+        renderContacts: function(){
+            var self = this;
+
+            self.$el.find("article").remove();
             _.each(self.childViews, function(childView){
                 childView.remove();
             });
             self.childViews = [];
 
+            var selectOfTypes = forms.createSelectOfItems(self.types);
             var container = document.createDocumentFragment();
-            _.each(this.viewableCollection.models, function (item) {
-                container.appendChild(self.renderContact(item));
+            _.each(self.collection.models, function (item) {
+                container.appendChild(self.renderContact(item, selectOfTypes));
             }, this);
             self.$el.append(container);
-
-            return this;
         },
 
-        renderContact: function (contactModel) {
+        renderContact: function (contactModel, selectOfTypes) {
             var self = this;
-            var selectOfTypes = forms.createSelectOfItems(self.types);
+
             var contactView = new ContactView({
                 model: contactModel,
-                selectOfTypes: selectOfTypes,
-                baseArray: self.baseArray
+                selectOfTypes: selectOfTypes
             });
             self.childViews.push(contactView);
             return contactView.render().el;
-        },
-
-        /**
-         * should only be called during initialization, or when reseting the viewableCollection to its broadest scope
-         */
-        renderContactTypeSelect: function(){
-            var self = this;
-            this.types = new Directory(self.baseArray).getTypes();
-            var options = forms.createOptions(this.types, ["<option value='all'>All</option>"]);
-            self.contactTypeSelect.find('option').remove().end().append(options);
         },
 
         events: {
@@ -241,23 +246,18 @@ define(function(require){
         },
 
         /**
-         * resets viewable viewableCollection, changes router state, and ensures that we have the correct state within the select
+         * resets collection, changes router state, and ensures that we have the correct state within the select
          *
          * Honestly, this function feels more like Controller logic.
          *
          */
         filterByType: function (filterType) {
             var self = this;
-            if (filterType === "all") {
-                this.viewableCollection.reset(this.baseArray);
-                contactsRouter.navigate("filter/all"); // I don't know why our view would have a reference to the router; we're changing a select & presentation, not really going to a new location
-            } else {
-                var filtered = _.filter(this.baseArray, function(item){
-                    return filterType === item.type.toLowerCase();
+            contactsRouter.navigate("filter/" + filterType);
+            this.collection.fetch({data:{filterType:filterType}})
+                .done(function(){
+                    self.render();
                 });
-                this.viewableCollection.reset(filtered);
-                contactsRouter.navigate("filter/" + filterType);
-            }
 
             /**
              * added to make sure that if someone uses the back-button, that the selected-value would match the presentation/view
@@ -278,51 +278,13 @@ define(function(require){
                 }
             });
 
-            this.baseArray.push(formData);
-            this.baseArray.trigger('add', formData);
-
             var newContact = new Contact(formData);
-            this.viewableCollection.add(newContact); // TODO: what if you add a Contact with a different 'type' than what's filtered [eg: self.contactTypeSelect.val()] ... should you show it?
-        },
-
-        viewableCollectionRemoveDataHandler: function (removedModel) {
-            var self = this;
-            var removed = removedModel.attributes;
-
-            if (removed.photo === Contact.prototype.defaults['photo']) {
-                delete removed.photo;
-            }
-
-            _.each(self.baseArray, function (contact, index) {
-                if (_.isEqual(contact, removed)) {
-                    self.baseArray.splice(index, 1);
-                    self.baseArray.trigger('remove', removed);
+            newContact.save().done(
+                function(data){
+                    self.collection.add(newContact);
                 }
-            });
-        },
-
-        baseArrayAddDataHandler: function(addedJson){
-            var self = this;
-            var typeLower = addedJson.type.toLowerCase();
-            if (_.indexOf(self.types, typeLower) === -1) {
-                self.types.push(typeLower);
-                forms.createOption(typeLower).appendTo(self.contactTypeSelect)
-                self.render(); // for each viewable ContactView, add typeLower to it's select as well or re-render them.
-            }
-        },
-
-        baseArrayRemoveDataHandler: function(removedJson){
-            var self = this;
-            var allTypes = new Directory(self.baseArray).getTypes();
-            var removedType = removedJson.type.toLowerCase();
-            if (_.indexOf(allTypes, removedType) === -1) {
-                self.types = _.without(self.types, removedType); // prevents removedType from showing up in future Contact edit click/views
-                var isSelectedTypeEqualToRemovedType = self.contactTypeSelect.val() === removedType;
-                self.contactTypeSelect.children("[value='" + removedType + "']").remove();
-                if ( isSelectedTypeEqualToRemovedType ){
-                    self.contactTypeSelect.val('all').trigger('change');
-                }
-            }
+            );
+            // TODO: what if you add a Contact with a different 'type' than what's filtered [eg: self.contactTypeSelect.val()] ... should you show it?
         },
 
         showFormClickUIHandler: function (e) {
@@ -346,7 +308,6 @@ define(function(require){
 
         initialize: function(options){
             var self = this;
-            self.directoryView = options.directoryView
         },
 
         urlFilter: function (type) {
@@ -362,7 +323,7 @@ define(function(require){
     });
 
     // create an instance of the master view [ let's get this party started!!! ]
-    var directoryView = new DirectoryView({baseArray:contactsData});
+    var directoryView = new DirectoryView({collection:new Directory()});
     var contactsRouter = new ContactsRouter({directoryView:directoryView});
 
     Backbone.history.start();
