@@ -186,22 +186,25 @@ define(function(require){
 
         renderContactTypeSelect: function(){
             var self = this;
-            var currentFilterType = self.contactTypeSelect.val();
+            var currentFilterType = self.filterType || self.contactTypeSelect.val();
 
-            $.getJSON(BASE_URL+"/types")
-                .done(function(json){
-                    self.types = json;
-
-                    if ( null === currentFilterType ){
+            if ( self.types.length === 0 ) {
+                $.getJSON(BASE_URL+"/types")
+                    .done(function(json){
+                        self.types = json;
                         var options = forms.createOptions(self.types, ["<option value='all'>All</option>"]);
                         self.contactTypeSelect.find('option').remove().end().append(options);
                         self.contactTypeSelect.val('all');
-                    } else if ( self.contactTypeSelect.val() !== currentFilterType) {
-                        self.contactTypeSelect.val(currentFilterType);
-                    }
-
-                    self.renderContacts();
-                });
+                        self.filterType = undefined;
+                        self.renderContacts();
+                    });
+            } else {
+                if ( self.contactTypeSelect.val() !== currentFilterType) {
+                    self.contactTypeSelect.val(currentFilterType);
+                }
+                self.filterType = undefined;
+                self.renderContacts();
+            }
 
         },
 
@@ -254,17 +257,11 @@ define(function(require){
         filterByType: function (filterType) {
             var self = this;
             contactsRouter.navigate("filter/" + filterType);
-            this.collection.fetch({data:{filterType:filterType}})
+            self.filterType = filterType;
+            self.collection.fetch({data:{filterType:filterType}})
                 .done(function(){
                     self.render();
                 });
-
-            /**
-             * added to make sure that if someone uses the back-button, that the selected-value would match the presentation/view
-             */
-            if ( self.contactTypeSelect.val() !== filterType) {
-                self.contactTypeSelect.val(filterType);
-            }
         },
 
         addContactButtonClickHandler: function (e) {
