@@ -26,7 +26,7 @@ define(function(require){
             var tmpl = _.template(this.template);
 
             this.$el.html(tmpl(this.model.toJSON()));
-            return this; // enable chai`ning
+            return this; // enable chaining
         },
 
         events: {
