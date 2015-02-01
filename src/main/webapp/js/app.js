@@ -256,7 +256,7 @@ define(function(require){
          */
         filterByType: function (filterType) {
             var self = this;
-            contactsRouter.navigate("filter/" + filterType);
+            contactsRouter.navigate("filter/" + filterType); // should the view be able to call the router directly?
             self.filterType = filterType;
             self.collection.fetch({data:{filterType:filterType}})
                 .done(function(){
@@ -305,10 +305,12 @@ define(function(require){
 
         initialize: function(options){
             var self = this;
+            self._directoryView = options.directoryView;
         },
 
         urlFilter: function (type) {
-            directoryView.filterByType(type);
+            var self = this;
+            self._directoryView.filterByType(type);
         },
 
         /**
