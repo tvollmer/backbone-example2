@@ -16,6 +16,7 @@ require(['jquery'], function($){
     specs.push('spec/utils/FormsSpec');
     specs.push('spec/model/ContactSpec');
     specs.push('spec/collection/DirectorySpec');
+    specs.push('spec/view/ContactViewSpec');
 
     $(function(){
         require(specs, function(){

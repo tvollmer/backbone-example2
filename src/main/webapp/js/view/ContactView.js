@@ -12,8 +12,8 @@ define(function(require){
     var ContactView = Backbone.View.extend({
         tagName: "article",
         className: "contact-container",
-        template: $("#contactTemplate").html(),
-        editTemplate: _.template($("#contactEditTemplate").html()),
+        template: require("text!template/contactTemplate.html"),
+        editTemplate: _.template(require("text!template/contactEditTemplate.html")),
 
         // TODO : need to make the 'Type' field for addNewContact to work the same as it does in the editTemplate (dropdown+edit)
 
@@ -34,7 +34,7 @@ define(function(require){
             "click button.edit": "editContactClickHandler",
             "click button.save": "saveEditsClickHandler",
             "click button.cancel": "cancelEditClickHandler",
-            "change select.type": "addTypeChangeUIHandler"
+            "change select.type": "typeChangeUIHandler"
         },
 
         deleteContactClickHandler: function (event) {
@@ -92,7 +92,7 @@ define(function(require){
             // use case #2 : edit contact #1, edit contact #2, click cancel for contact #2; causes viewableCollection.onReset to fire which re-renders DirectoryView
         },
 
-        addTypeChangeUIHandler: function(event){
+        typeChangeUIHandler: function(event){
             if (this.cachedRefOfTypeSelect.val() === "addType") {
                 this.cachedRefOfTypeSelect.remove();
 

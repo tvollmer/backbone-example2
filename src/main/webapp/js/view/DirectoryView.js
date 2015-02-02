@@ -6,6 +6,7 @@ define(function(require){
     var Contact = require("model/Contact");
     var ContactView = require("view/ContactView");
     var FormUtils = require("utils/Forms");
+    var formHtml = require("text!template/addContactFormTemplate.html");
 
     var forms = new FormUtils();
 
@@ -52,7 +53,7 @@ define(function(require){
         render: function () {
             var self = this;
             self.renderContactTypeSelect();
-
+            $("#addContactFormWrapper").append(formHtml);
             return this;
         },
 
