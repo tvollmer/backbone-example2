@@ -8,7 +8,7 @@ describe("ContactView", function(){
 
         require(["view/ContactView", "model/Contact", "utils/Forms"], function(ContactView, Contact, Forms){
             var forms = new Forms();
-            var contactModel = new Contact({
+            self.contactModel = new Contact({
                 photo: "img/placeholder.png",
                 name: "My Name",
                 address: "my address",
@@ -18,7 +18,7 @@ describe("ContactView", function(){
             });
             var selectOfTypes = forms.createSelectOfItems(['friend', 'family', 'colleage']);
             self.contactView = new ContactView({
-                model: contactModel,
+                model: self.contactModel,
                 selectOfTypes: selectOfTypes
             });
             sandbox.html(self.contactView.render().el);
@@ -71,7 +71,7 @@ describe("ContactView", function(){
             expect( self.contactView.cachedRefOfTypeSelect.val()).toBe( 'friend' );
         });
 
-        it("should switch back to the initial view when the cancel button is clicked", function(){
+        it("should switch back to the initial view when the cancel button is clicked (even if the user changed a field)", function(){
             var self = this;
             var preventDefaultWasCalled = false;
             var stubEvent = {
@@ -81,6 +81,7 @@ describe("ContactView", function(){
                 }
             };
             self.contactView.editContactClickHandler();
+            self.contactView.$el.find(".name").val('Foo Name'); // simulate user change
             self.contactView.cancelEditClickHandler(stubEvent);
 
             var html = self.contactView.$el.html();
@@ -124,6 +125,91 @@ describe("ContactView", function(){
 
     });
 
-    // TODO: write tests for deleteContactClickHandler
-    // TODO: write tests for saveEditsClickHandler
+    describe("should do proper cleanup when the delete button is clicked", function(){
+
+        it("should cleanup the model", function(){
+            var self = this;
+            spyOn(self.contactModel, "destroy");
+            self.contactView.deleteContactClickHandler();
+            expect(self.contactModel.destroy).toHaveBeenCalled();
+        });
+
+        it("should remove the view", function(){
+            var self = this;
+            spyOn(self.contactView, "remove");
+            self.contactView.deleteContactClickHandler();
+            expect(self.contactView.remove).toHaveBeenCalled();
+        });
+
+    });
+
+    describe("should save the form inputs when the save button is clicked", function(){
+
+        var self = this;
+        var preventDefaultWasCalled = false;
+        var stubEvent = {
+            preventDefault : function(){
+                preventDefaultWasCalled = true;
+                return false;
+            }
+        };
+
+        it("should prevent the default form submission from occurring", function(){
+            var self = this;
+            spyOn(self.contactModel, "save"); // don't want an actual save
+            self.contactView.saveEditsClickHandler(stubEvent);
+            expect(preventDefaultWasCalled).toBeTruthy();
+        });
+
+        it("should call model.set", function(){
+            var self = this;
+            spyOn(self.contactModel, "set");
+            spyOn(self.contactModel, "save"); // don't want an actual save
+
+            self.contactView.editContactClickHandler();
+            var stubEventWithTarget = {
+                preventDefault : function(){
+                    preventDefaultWasCalled = true;
+                    return false;
+                },
+                target : self.contactView.$el.find('.name')
+            };
+            self.contactView.saveEditsClickHandler(stubEventWithTarget);
+
+            expect(self.contactModel.set).toHaveBeenCalledWith({
+                name: "My Name",
+                address: "my address",
+                tel: "98765433",
+                email: "nomail@gmail.com",
+                type: "friend"
+            }); // deleted photo if none provided
+        });
+
+        it("should call model.save", function(){
+            var self = this;
+            spyOn(self.contactModel, "save");
+
+            self.contactView.editContactClickHandler();
+            var stubEventWithTarget = {
+                preventDefault : function(){
+                    preventDefaultWasCalled = true;
+                    return false;
+                },
+                target : self.contactView.$el.find('.name')
+            };
+            self.contactView.saveEditsClickHandler(stubEventWithTarget);
+
+            expect(self.contactModel.save).toHaveBeenCalled();
+        });
+
+        it("should re-render after saving", function(){
+            var self = this;
+            spyOn(self.contactView, "render");
+            spyOn(self.contactModel, "save"); // don't want an actual save
+            self.contactView.saveEditsClickHandler(stubEvent);
+            expect(self.contactView.render).toHaveBeenCalled();
+        });
+
+    });
+
 });

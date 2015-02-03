@@ -59,7 +59,7 @@ define(function(require){
 
         saveEditsClickHandler: function (event) {
             event.preventDefault();
-
+            // TODO : make a way to save a contact's image?
             var formData = {};
             var theModel = this.model;
             var theForm = $(event.target).closest("form");
