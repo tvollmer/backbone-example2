@@ -11,7 +11,7 @@ define(function(require){
         var ContactsRouter = require("Router");
 
         var directory = new Directory();
-        var directoryView = new DirectoryView({collection:directory});
+        var directoryView = new DirectoryView({el:"#container", collection:directory});
         var contactsRouter = new ContactsRouter({directoryView:directoryView});
         directoryView.router = contactsRouter;
 
