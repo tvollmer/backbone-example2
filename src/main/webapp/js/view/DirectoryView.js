@@ -25,13 +25,13 @@ define(function(require){
         },
 
         collectionResetDataHandler: function(e){
-            this.render(e);
+            this.render();
         },
 
         collectionAddDataHandler: function(addedModel){
             var self = this;
-            var contactsDiv = $("#contacts");
-            var contactTypeSelect = $("#filterType");
+            var contactsDiv = self.$el.find("#contacts");
+            var contactTypeSelect = self.$el.find("#filterType");
             contactsDiv.append(self.renderContact(addedModel));
 
             var typeLower = addedModel.get('type').toLowerCase();
@@ -89,7 +89,7 @@ define(function(require){
 
         renderContacts: function(){
             var self = this;
-            var contactsDiv = $("#contacts");
+            var contactsDiv = self.$el.find("#contacts");
 
             contactsDiv.find("article").remove();
             _.each(self.childViews, function(childView){
@@ -147,12 +147,13 @@ define(function(require){
         addContactButtonClickHandler: function (e) {
             e.preventDefault();
             var self = this;
-            var addNewContactInputs = $("#addContact").children("input");
+            var addNewContactInputs = self.$el.find("#addContact").children("input");
 
             var formData = {};
-            addNewContactInputs.each(function (i, el) {
-                if ($(el).val() !== "") {
-                    formData[el.id] = $(el).val();
+            addNewContactInputs.each(function (i, elem) {
+                var element = $(elem);
+                if (element.val() !== "") {
+                    formData[elem.id] = element.val();
                 }
             });
 
@@ -168,7 +169,7 @@ define(function(require){
         showFormClickUIHandler: function (e) {
             e.preventDefault();
             var self = this;
-            var addContactForm = $("#addContact");
+            var addContactForm = self.$el.find("#addContact");
             if ( !self.formIsVisible ){
                 addContactForm.slideToggle(function(){
                     self.formIsVisible = true;
