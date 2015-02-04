@@ -19,6 +19,7 @@ require(['jquery'], function($){
     specs.push('spec/view/ContactViewSpec');
     specs.push('spec/view/DirectoryViewSpec');
     specs.push('spec/RouterSpec');
+    specs.push('spec/AppSpec');
 
     $(function(){
         require(specs, function(){
