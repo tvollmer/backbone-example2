@@ -11,6 +11,7 @@ describe("DirectoryView", function(){
             self.directoryView = new DirectoryView({collection:self.directory});
             self.directoryView.filterType = "all";
 //            self.directoryView.collection = directory;
+            self.directoryView.types = ['one'];
             self.Contact = Contact;
             self.contactModel = new Contact({
                 photo: "img/placeholder.png",
@@ -75,6 +76,7 @@ describe("DirectoryView", function(){
             var self = this;
             self.directoryView.types = ['foo', 'bar', 'quox'];
             self.directoryView.filterType = 'bar';
+            self.directoryView.$el.find('#filterType').find('option').remove();
             self.directoryView.renderContactTypeSelect();
 
             var html = self.directoryView.$el.html();
@@ -316,10 +318,10 @@ describe("DirectoryView", function(){
                 email: "nomail@gmail.com",
                 type: "friend"
             });
+            spyOn(self.directoryView, 'renderContact');
             self.directoryView.collectionAddDataHandler(myThirdFriend);
 
-            var html = self.directoryView.$el.html();
-            expect( html.indexOf("My Third Name") > -1).toBeTruthy();
+            expect( self.directoryView.renderContact ).toHaveBeenCalled();
         });
 
         it("collection add handler should NOT try to add a new type to the select if it already exists (case-insensitive)", function(){

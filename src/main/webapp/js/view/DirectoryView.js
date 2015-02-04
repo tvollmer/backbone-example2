@@ -1,27 +1,29 @@
 define(function(require){
 
-    var $ = require("jquery");
-    var _ = require("underscore");
-    var Backbone = require("backbone");
-    var Contact = require("model/Contact");
-    var ContactView = require("view/ContactView");
-    var FormUtils = require("utils/Forms");
-    var formHtml = require("text!template/addContactFormTemplate.html");
+    'use strict';
+
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Contact = require('model/Contact');
+    var ContactView = require('view/ContactView');
+    var FormUtils = require('utils/Forms');
+    var formHtml = require('text!template/addContactFormTemplate.html');
 
     var forms = new FormUtils();
 
     var BASE_URL = 'http://localhost:8080/backbone-example/app/Contacts';
 
     var DirectoryView = Backbone.View.extend({
-//        el: "#container", // set by app.js, but not jasmine
-        template: require("text!template/directoryViewTemplate.html"),
+//        el: '#container', // set by app.js, but not jasmine
+        template: require('text!template/directoryViewTemplate.html'),
         childViews: [],
         types: [],
 
         initialize: function (options) {
-            this.listenTo(this.collection, "reset", this.collectionResetDataHandler);
-            this.listenTo(this.collection, "add", this.collectionAddDataHandler);
-            this.listenTo(this.collection, "remove", this.collectionRemoveDataHandler);
+            this.listenTo(this.collection, 'reset', this.collectionResetDataHandler);
+            this.listenTo(this.collection, 'add', this.collectionAddDataHandler);
+            this.listenTo(this.collection, 'remove', this.collectionRemoveDataHandler);
         },
 
         collectionResetDataHandler: function(e){
@@ -30,14 +32,15 @@ define(function(require){
 
         collectionAddDataHandler: function(addedModel){
             var self = this;
-            var contactsDiv = self.$el.find("#contacts");
-            var contactTypeSelect = self.$el.find("#filterType");
+            var contactsDiv = self.$el.find('#contacts');
+            var contactTypeSelect = self.$el.find('#filterType');
             contactsDiv.append(self.renderContact(addedModel));
 
             var typeLower = addedModel.get('type').toLowerCase();
             if (self.types.length !== 0 && _.indexOf(self.types, typeLower) === -1) {
                 self.types.push(typeLower);
-                forms.createOption(typeLower).appendTo(contactTypeSelect)
+                forms.createOption(typeLower).appendTo(contactTypeSelect);
+                self.filterType = contactTypeSelect.val();
                 self.render(); // for each viewable ContactView, add typeLower to it's select as well or re-render them.
             }
         },
@@ -56,28 +59,28 @@ define(function(require){
             var tmpl = _.template(self.template);
             self.$el.html(tmpl({}));
             self.renderContactTypeSelect();
-            self.$el.find("#addContactFormWrapper").append(formHtml);
+            self.$el.find('#addContactFormWrapper').append(formHtml);
             return this;
         },
 
         renderContactTypeSelect: function(){
             var self = this;
-            var contactTypeSelect = self.$el.find("#filterType");
+            var contactTypeSelect = self.$el.find('#filterType');
             var currentFilterType = self.filterType || contactTypeSelect.val();
 
             if ( self.types.length === 0 ) {
-                $.getJSON(BASE_URL+"/types")
+                $.getJSON(BASE_URL+'/types')
                     .done(function(json){
                         self.types = json;
-                        var options = forms.createOptions(self.types, ["<option value='all'>All</option>"]);
+                        var options = forms.createOptions(self.types, ['<option value="all">All</option>']);
                         contactTypeSelect.find('option').remove().end().append(options);
                         contactTypeSelect.val(currentFilterType);
                         self.filterType = undefined;
                         self.renderContacts();
                     });
             } else {
-                if ( contactTypeSelect.find("option").length === 0 ){
-                    var options = forms.createOptions(self.types, ["<option value='all'>All</option>"]);
+                if ( contactTypeSelect.find('option').length === 0 ){
+                    var options = forms.createOptions(self.types, ['<option value="all">All</option>']);
                     contactTypeSelect.find('option').remove().end().append(options);
                 }
                 contactTypeSelect.val(currentFilterType);
@@ -89,9 +92,9 @@ define(function(require){
 
         renderContacts: function(){
             var self = this;
-            var contactsDiv = self.$el.find("#contacts");
+            var contactsDiv = self.$el.find('#contacts');
 
-            contactsDiv.find("article").remove();
+            contactsDiv.find('article').remove();
             _.each(self.childViews, function(childView){
                 childView.remove();
             });
@@ -117,9 +120,9 @@ define(function(require){
         },
 
         events: {
-            "click #add": "addContactButtonClickHandler",
-            "click #showForm": "showFormClickUIHandler",
-            "change #filterType": "filterTypeChangeUIHandler"
+            'click #add': 'addContactButtonClickHandler',
+            'click #showForm': 'showFormClickUIHandler',
+            'change #filterType': 'filterTypeChangeUIHandler'
         },
 
         filterTypeChangeUIHandler: function(e){
@@ -136,7 +139,7 @@ define(function(require){
          */
         filterByType: function (filterType) {
             var self = this;
-            self.router.navigate("filter/" + filterType); // should the view be able to call the router directly?
+            self.router.navigate('filter/' + filterType); // should the view be able to call the router directly?
             self.filterType = filterType;
             self.collection.fetch({data:{filterType:filterType}})
                 .done(function(){
@@ -147,12 +150,12 @@ define(function(require){
         addContactButtonClickHandler: function (e) {
             e.preventDefault();
             var self = this;
-            var addNewContactInputs = self.$el.find("#addContact").children("input");
+            var addNewContactInputs = self.$el.find('#addContact').children('input');
 
             var formData = {};
             addNewContactInputs.each(function (i, elem) {
                 var element = $(elem);
-                if (element.val() !== "") {
+                if (element.val() !== '') {
                     formData[elem.id] = element.val();
                 }
             });
@@ -169,7 +172,7 @@ define(function(require){
         showFormClickUIHandler: function (e) {
             e.preventDefault();
             var self = this;
-            var addContactForm = self.$el.find("#addContact");
+            var addContactForm = self.$el.find('#addContact');
             if ( !self.formIsVisible ){
                 addContactForm.slideToggle(function(){
                     self.formIsVisible = true;

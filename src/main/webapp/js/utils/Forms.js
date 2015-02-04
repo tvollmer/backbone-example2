@@ -1,6 +1,9 @@
 define(function (require) {
-    var _ = require("underscore");
-    var $ = require("jquery");
+
+    'use strict';
+
+    var _ = require('underscore');
+    var $ = require('jquery');
 
     function Forms(options) {
         var self = this;
@@ -25,7 +28,7 @@ define(function (require) {
      * @returns {*|jQuery|HTMLElement}
      */
     prototype.createSelectOfItems = function (items, options) {
-        var select = $("<select/>", options);
+        var select = $('<select/>', options);
         var optsArray = prototype.createOptions(items);
         return select.append(optsArray);
     };
@@ -69,7 +72,7 @@ define(function (require) {
      * @returns {*|jQuery|HTMLElement}
      */
     prototype.createOption = function(value, html){
-        return $("<option/>", {
+        return $('<option/>', {
             value: value,
             html: html || value
         });

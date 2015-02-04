@@ -1,19 +1,21 @@
 define(function(require){
 
-    var $ = require("jquery");
-    var _ = require("underscore");
-    var Backbone = require("backbone");
-    var Contact = require("model/Contact");
-    var FormUtils = require("utils/Forms");
+    'use strict';
+
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var Backbone = require('backbone');
+    var Contact = require('model/Contact');
+    var FormUtils = require('utils/Forms');
 
     var forms = new FormUtils();
 
 
     var ContactView = Backbone.View.extend({
-        tagName: "article",
-        className: "contact-container",
-        template: require("text!template/contactTemplate.html"),
-        editTemplate: _.template(require("text!template/contactEditTemplate.html")),
+        tagName: 'article',
+        className: 'contact-container',
+        template: require('text!template/contactTemplate.html'),
+        editTemplate: _.template(require('text!template/contactEditTemplate.html')),
 
         // TODO : need to make the 'Type' field for addNewContact to work the same as it does in the editTemplate (dropdown+edit)
 
@@ -30,11 +32,11 @@ define(function(require){
         },
 
         events: {
-            "click button.delete": "deleteContactClickHandler",
-            "click button.edit": "editContactClickHandler",
-            "click button.save": "saveEditsClickHandler",
-            "click button.cancel": "cancelEditClickHandler",
-            "change select.type": "typeChangeUIHandler"
+            'click button.delete': 'deleteContactClickHandler',
+            'click button.edit': 'editContactClickHandler',
+            'click button.save': 'saveEditsClickHandler',
+            'click button.cancel': 'cancelEditClickHandler',
+            'change select.type': 'typeChangeUIHandler'
         },
 
         deleteContactClickHandler: function (event) {
@@ -46,13 +48,13 @@ define(function(require){
             // TODO : if you have multiple records in their Edit view, and you click save ( with a new type ), then it will be re-rendered, and your changes will be lost; one solution would be to only allow no more than 1 Contact to be in an Edit mode at a time.
             this.$el.html(this.editTemplate(this.model.toJSON()));
 
-            var nameElem = this.$el.find(".name");
-            var typeElem = this.$el.find("#type");
+            var nameElem = this.$el.find('.name');
+            var typeElem = this.$el.find('#type');
             var selectedTypeVal = typeElem.val().toLowerCase();
             typeElem.remove();
 
-            var newOpt = forms.createOption("addType", "<em>Add new...</em>");
-            this.cachedRefOfTypeSelect = this.selectOfTypes.clone().addClass("type")
+            var newOpt = forms.createOption('addType', '<em>Add new...</em>');
+            this.cachedRefOfTypeSelect = this.selectOfTypes.clone().addClass('type')
                 .val(selectedTypeVal).append(newOpt)
                 .insertAfter(nameElem);
         },
@@ -62,16 +64,16 @@ define(function(require){
             // TODO : make a way to save a contact's image?
             var formData = {};
             var theModel = this.model;
-            var theForm = $(event.target).closest("form");
+            var theForm = $(event.target).closest('form');
 
             _.each(Object.keys(theModel.attributes), function(attr, index){
-                var newVal = theForm.find("."+attr).val();
+                var newVal = theForm.find('.'+attr).val();
                 if ( undefined !== newVal ){
                     formData[attr] = newVal;
                 }
             });
 
-            if (formData.photo === "") {
+            if (formData.photo === '') {
                 delete formData.photo;
             }
 
@@ -93,12 +95,12 @@ define(function(require){
         },
 
         typeChangeUIHandler: function(event){
-            if (this.cachedRefOfTypeSelect.val() === "addType") {
+            if (this.cachedRefOfTypeSelect.val() === 'addType') {
                 this.cachedRefOfTypeSelect.remove();
 
-                $("<input />", {
-                    "class": "type"
-                }).insertAfter(this.$el.find(".name")).focus();
+                $('<input />', {
+                    'class': 'type'
+                }).insertAfter(this.$el.find('.name')).focus();
             }
         }
     });

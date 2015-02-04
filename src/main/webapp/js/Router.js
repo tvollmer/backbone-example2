@@ -1,14 +1,14 @@
 define(function(require){
 
-    var $ = require("jquery");
-    var _ = require("underscore");
-    var Backbone = require("backbone");
+    'use strict';
+
+    var Backbone = require('backbone');
 
     var Router = Backbone.Router.extend({
         routes: {
-            "": 'defaultRoute',
-            "filter/:type": "urlFilter",
-            "*path": 'defaultRoute'
+            '': 'defaultRoute',
+            'filter/:type': 'urlFilter',
+            '*path': 'defaultRoute'
         },
 
         initialize: function(options){
