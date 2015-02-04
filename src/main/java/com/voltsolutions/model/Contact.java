@@ -2,16 +2,19 @@ package com.voltsolutions.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.DateSerializer;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.util.Date;
 
-public class Contact implements Serializable {
+public class Contact implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -3288619177798444712L;
 
-    private int id;
+    private Integer id;
     private String name;
     private String address;
     private String tel;
@@ -20,11 +23,11 @@ public class Contact implements Serializable {
     private String photo; // should probably be a fileName, fileId, or byte[]
     private Date createdDate;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -99,6 +102,7 @@ public class Contact implements Serializable {
         return this;
     }
 
+
     public String getName() {
         return name;
     }
@@ -125,7 +129,35 @@ public class Contact implements Serializable {
         return this;
     }
 
+    public int hashCode(){
+        return new HashCodeBuilder(3, 7)
+                .append(id)
+                .append(name)
+                .append(tel)
+                .append(email)
+                .toHashCode();
+    }
+
+    public final boolean equals(Object other){
+        if (other == null){ return false; }
+        if (!(other instanceof Contact)){ return false; }
+        Contact that = (Contact)other;
+        return new EqualsBuilder()
+                .append(this.id, that.id)
+                .append(this.name, that.name)
+                .append(this.tel, that.tel)
+                .append(this.email, that.email)
+                .isEquals();
+    }
+
     public String toString(){
         return new ReflectionToStringBuilder(this).toString();
+    }
+
+    @Override
+    public Contact clone() throws CloneNotSupportedException {
+        Contact contact = new Contact();
+        BeanUtils.copyProperties(this, contact);
+        return contact;
     }
 }
