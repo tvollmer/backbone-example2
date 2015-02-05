@@ -1,15 +1,11 @@
 define(function(require){
 
-    var $ = require("jquery");
-    var _ = require("underscore");
+    'use strict';
+
     var Backbone = require("backbone");
     var App = require("app");
 
     return describe("App", function(){
-
-        beforeEach(function(){
-            var self = this;
-        });
 
         describe("should set options on initialization", function(){
 

@@ -1,51 +1,48 @@
-describe("Router", function(){
+define(function(require){
 
-    var typeArg = undefined;
-    var stubDirectoryView = {
+    'use strict';
 
-        filterByType : function(type){
-            typeArg = type;
-        }
+    var Router = require("Router");
 
-    };
+    return describe("Router", function(){
 
-    beforeEach(function(){
-        var self = this;
-        var flag = false;
+        var typeArg = undefined;
+        var stubDirectoryView = {
 
-        require(["Router"], function(Router){
-            self.router = new Router({directoryView:stubDirectoryView});
-            flag = true;
+            filterByType : function(type){
+                typeArg = type;
+            }
+
+        };
+
+        beforeEach(function(){
+            this.router = new Router({directoryView:stubDirectoryView});
         });
 
-        waitsFor(function() {
-            return flag;
+        describe("should set options on initialization", function(){
+
+            it("should set directoryView", function(){
+                var self = this;
+                expect( self.router.directoryView ).toBe(stubDirectoryView);
+            });
+
         });
 
-    });
+        describe("should be able delegate to filterByType", function(){
 
-    describe("should set options on initialization", function(){
+            it("should return the supplied name", function(){
+                var self = this;
+                self.router.urlFilter("Some Type");
+                expect( typeArg ).toBe('Some Type');
+            });
 
-        it("should set directoryView", function(){
-            var self = this;
-            expect( self.router.directoryView ).toBe(stubDirectoryView);
-        });
+            it("should handle a default route", function(){
+                var self = this;
+                spyOn(self.router, "urlFilter");
+                self.router.defaultRoute("foo route");
+                expect(self.router.urlFilter).toHaveBeenCalledWith('all');
+            });
 
-    });
-
-    describe("should be able delegate to filterByType", function(){
-
-        it("should return the supplied name", function(){
-            var self = this;
-            self.router.urlFilter("Some Type");
-            expect( typeArg ).toBe('Some Type');
-        });
-
-        it("should handle a default route", function(){
-            var self = this;
-            spyOn(self.router, "urlFilter");
-            self.router.defaultRoute("foo route");
-            expect(self.router.urlFilter).toHaveBeenCalledWith('all');
         });
 
     });
