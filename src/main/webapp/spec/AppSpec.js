@@ -5,7 +5,7 @@ define(function(require){
     var Backbone = require("backbone");
     var App = require("app");
 
-    return describe("App", function(){
+    describe("App", function(){
 
         describe("should set options on initialization", function(){
 

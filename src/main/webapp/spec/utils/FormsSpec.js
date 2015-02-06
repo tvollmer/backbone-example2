@@ -4,7 +4,7 @@ define(function(require){
 
     var Forms = require("utils/Forms");
 
-    return describe("Forms", function(){
+    describe("Forms", function(){
 
         beforeEach(function(){
             var self = this;

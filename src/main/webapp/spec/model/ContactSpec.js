@@ -5,7 +5,7 @@ define(function(require){
     var Directory = require("collection/Directory");
     var Contact = require("model/Contact");
 
-    return describe("Contacts", function(){
+    describe("Contacts", function(){
 
         beforeEach(function(){
             var self = this;

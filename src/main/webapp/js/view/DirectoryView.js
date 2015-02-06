@@ -32,8 +32,8 @@ define(function(require){
 
         collectionAddDataHandler: function(addedModel){
             var self = this;
-            var contactsDiv = self.$el.find('#contacts');
-            var contactTypeSelect = self.$el.find('#filterType');
+            var contactsDiv = self.$('#contacts');
+            var contactTypeSelect = self.$('#filterType');
             contactsDiv.append(self.renderContact(addedModel));
 
             var typeLower = addedModel.get('type').toLowerCase();
@@ -59,29 +59,31 @@ define(function(require){
             var tmpl = _.template(self.template);
             self.$el.html(tmpl({}));
             self.renderContactTypeSelect();
-            self.$el.find('#addContactFormWrapper').append(formHtml);
+            self.$('#addContactFormWrapper').append(formHtml);
             return this;
         },
 
         renderContactTypeSelect: function(){
             var self = this;
-            var contactTypeSelect = self.$el.find('#filterType');
+            var contactTypeSelect = self.$('#filterType');
+            var contactTypeSelectOptions = contactTypeSelect.find('option');
             var currentFilterType = self.filterType || contactTypeSelect.val();
+            var allOption = '<option value="all">All</option>';
 
             if ( self.types.length === 0 ) {
                 $.getJSON(BASE_URL+'/types')
                     .done(function(json){
                         self.types = json;
-                        var options = forms.createOptions(self.types, ['<option value="all">All</option>']);
-                        contactTypeSelect.find('option').remove().end().append(options);
+                        var options = forms.createOptions(self.types, [allOption]);
+                        contactTypeSelectOptions.remove().end().append(options);
                         contactTypeSelect.val(currentFilterType);
                         self.filterType = undefined;
                         self.renderContacts();
                     });
             } else {
-                if ( contactTypeSelect.find('option').length === 0 ){
-                    var options = forms.createOptions(self.types, ['<option value="all">All</option>']);
-                    contactTypeSelect.find('option').remove().end().append(options);
+                if ( contactTypeSelectOptions.length === 0 ){
+                    var options = forms.createOptions(self.types, [allOption]);
+                    contactTypeSelectOptions.remove().end().append(options);
                 }
                 contactTypeSelect.val(currentFilterType);
                 self.filterType = undefined;
@@ -92,7 +94,7 @@ define(function(require){
 
         renderContacts: function(){
             var self = this;
-            var contactsDiv = self.$el.find('#contacts');
+            var contactsDiv = self.$('#contacts');
 
             contactsDiv.find('article').remove();
             _.each(self.childViews, function(childView){
@@ -105,7 +107,8 @@ define(function(require){
             _.each(self.collection.models, function (item) {
                 container.appendChild(self.renderContact(item, selectOfTypes));
             }, this);
-            contactsDiv.append(container);
+
+            contactsDiv.find('#articles').append(container);
         },
 
         renderContact: function (contactModel, selectOfTypes) {
@@ -150,7 +153,7 @@ define(function(require){
         addContactButtonClickHandler: function (e) {
             e.preventDefault();
             var self = this;
-            var addNewContactInputs = self.$el.find('#addContact').children('input');
+            var addNewContactInputs = self.$('#addContact').children('input');
 
             var formData = {};
             addNewContactInputs.each(function (i, elem) {
@@ -172,7 +175,7 @@ define(function(require){
         showFormClickUIHandler: function (e) {
             e.preventDefault();
             var self = this;
-            var addContactForm = self.$el.find('#addContact');
+            var addContactForm = self.$('#addContact');
             if ( !self.formIsVisible ){
                 addContactForm.slideToggle(function(){
                     self.formIsVisible = true;

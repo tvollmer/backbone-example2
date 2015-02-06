@@ -6,7 +6,7 @@ define(function(require){
     var Contact = require("model/Contact");
     var Forms = require("utils/Forms");
 
-    return describe("ContactView", function(){
+    describe("ContactView", function(){
 
         var sandbox = $('#sandbox');
 
@@ -81,7 +81,7 @@ define(function(require){
                     }
                 };
                 self.contactView.editContactClickHandler();
-                self.contactView.$el.find(".name").val('Foo Name'); // simulate user change
+                self.contactView.$(".name").val('Foo Name'); // simulate user change
                 self.contactView.cancelEditClickHandler(stubEvent);
 
                 var html = self.contactView.$el.html();
@@ -104,7 +104,7 @@ define(function(require){
             it("after clicking 'edit', should show the type as a select box", function(){
                 var self = this;
                 self.contactView.editContactClickHandler();
-                expect( self.contactView.$el.find('.type').is('select') ).toBeTruthy();
+                expect( self.contactView.$('.type').is('select') ).toBeTruthy();
             });
 
             it("should change the type field to an text-input when a user selects 'Add new'", function(){
@@ -112,14 +112,14 @@ define(function(require){
                 self.contactView.editContactClickHandler();
                 self.contactView.cachedRefOfTypeSelect.val('addType');
                 self.contactView.typeChangeUIHandler(); // need to simulate the change-event that would have fired
-                expect( self.contactView.$el.find('.type').is('input') ).toBeTruthy();
+                expect( self.contactView.$('.type').is('input') ).toBeTruthy();
             });
 
             it("should keep the type field as a select when a user selects anything other than 'Add new'", function(){
                 var self = this;
                 self.contactView.editContactClickHandler();
                 self.contactView.typeChangeUIHandler();
-                expect( self.contactView.$el.find('.type').is('select') ).toBeTruthy();
+                expect( self.contactView.$('.type').is('select') ).toBeTruthy();
 
             });
 
@@ -172,7 +172,7 @@ define(function(require){
                         preventDefaultWasCalled = true;
                         return false;
                     },
-                    target : self.contactView.$el.find('.name')
+                    target : self.contactView.$('.name')
                 };
                 self.contactView.saveEditsClickHandler(stubEventWithTarget);
 
@@ -195,7 +195,7 @@ define(function(require){
                         preventDefaultWasCalled = true;
                         return false;
                     },
-                    target : self.contactView.$el.find('.name')
+                    target : self.contactView.$('.name')
                 };
                 self.contactView.saveEditsClickHandler(stubEventWithTarget);
 

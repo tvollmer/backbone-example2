@@ -4,7 +4,7 @@ define(function(require){
 
     var Router = require("Router");
 
-    return describe("Router", function(){
+    describe("Router", function(){
 
         var typeArg = undefined;
         var stubDirectoryView = {

@@ -7,10 +7,9 @@ define(function(require){
     var Contact = require("model/Contact");
     var Forms = require("utils/Forms");
     var Router = require("Router");
+    var sandbox = $('#sandbox');
 
-    return describe("DirectoryView", function(){
-
-        var sandbox = $('#sandbox');
+    describe("DirectoryView", function(){
 
         beforeEach(function(){
             var self = this;
@@ -27,7 +26,7 @@ define(function(require){
                 type: "friend"
             });
             self.forms = new Forms();
-            self.directoryView.router = new Router({directoryView:self.directoryView});
+            self.directoryView.router = new Router({directoryView:self.directoryView})
             sandbox.html(self.directoryView.render().el);
         });
 
@@ -55,17 +54,17 @@ define(function(require){
 
                 expect( html.indexOf("form") > -1).toBeTruthy();
                 expect( html.indexOf("input") > -1).toBeTruthy();
-                expect( self.directoryView.$el.find('#addContact').is(":visible") ).toBeFalsy();
+                expect( self.directoryView.$('#addContact').is(":visible") ).toBeFalsy();
             });
 
             it("should select the correct filterType when types has values (by pre-selected)", function(){
                 var self = this;
                 self.directoryView.types = ['foo', 'bar', 'quox'];
                 self.directoryView.render();
-                self.directoryView.$el.find('#filterType').val('quox');
+                self.directoryView.$('#filterType').val('quox');
                 self.directoryView.renderContactTypeSelect();
 
-                expect( self.directoryView.$el.find('#filterType').val() ).toBe('quox');
+                expect( self.directoryView.$('#filterType').val() ).toBe('quox');
 
             });
 
@@ -73,7 +72,7 @@ define(function(require){
                 var self = this;
                 self.directoryView.types = ['foo', 'bar', 'quox'];
                 self.directoryView.filterType = 'bar';
-                self.directoryView.$el.find('#filterType').find('option').remove();
+                self.directoryView.$('#filterType').find('option').remove();
                 self.directoryView.renderContactTypeSelect();
 
                 var html = self.directoryView.$el.html();
@@ -83,7 +82,7 @@ define(function(require){
                 expect( html.indexOf("bar") > -1).toBeTruthy();
                 expect( html.indexOf("quox") > -1).toBeTruthy();
 
-                expect( self.directoryView.$el.find('#filterType').val() ).toBe('bar');
+                expect( self.directoryView.$('#filterType').val() ).toBe('bar');
 
             });
 
@@ -204,7 +203,7 @@ define(function(require){
                 var self = this;
                 expect( self.directoryView.formIsVisible ).toBeFalsy();
                 self.directoryView.showFormClickUIHandler(stubEvent);
-                var addContactForm = self.directoryView.$el.find('#addContact');
+                var addContactForm = self.directoryView.$('#addContact');
     //            console.log("and the form was ", addContactForm.wrap("<div>").parent().html());
                 waitsFor(function(){
                     return addContactForm.css('display') !== 'none';
@@ -232,7 +231,7 @@ define(function(require){
 
                 spyOn(self.directoryView.collection, "add");
                 self.directoryView.showFormClickUIHandler(stubEvent);
-                var addContactForm = self.directoryView.$el.find('#addContact');
+                var addContactForm = self.directoryView.$('#addContact');
                 waitsFor(function(){
                     return addContactForm.css('display') !== 'none';
                 }, "the form to be visible", 500);
@@ -264,7 +263,7 @@ define(function(require){
                 };
 
                 self.directoryView.showFormClickUIHandler(stubEvent);
-                var addContactForm = self.directoryView.$el.find('#addContact');
+                var addContactForm = self.directoryView.$('#addContact');
                 waitsFor(function(){
                     return addContactForm.css('display') !== 'none';
                 }, "the form to be visible", 500);
@@ -336,7 +335,7 @@ define(function(require){
                 spyOn(self.directoryView, "render");
                 self.directoryView.collectionAddDataHandler(myThirdFriend);
 
-                var html = self.directoryView.$el.find("#filterType").parent().html();
+                var html = self.directoryView.$("#filterType").parent().html();
                 expect( html.indexOf("FRIEND") > -1).toBeFalsy();
                 expect(self.directoryView.render).not.toHaveBeenCalled();
             });
@@ -356,7 +355,7 @@ define(function(require){
                 spyOn(self.directoryView, "render");
                 self.directoryView.collectionAddDataHandler(myMentor);
 
-                var html = self.directoryView.$el.find("#filterType").parent().html();
+                var html = self.directoryView.$("#filterType").parent().html();
                 expect( html.indexOf("mentor") > -1).toBeTruthy();
                 expect(self.directoryView.render).toHaveBeenCalled();
                 expect(_.indexOf(self.directoryView.types, 'mentor') > -1).toBeTruthy(); // lower Mentor should be added
@@ -377,7 +376,7 @@ define(function(require){
                 spyOn(self.directoryView, "render");
                 self.directoryView.collectionAddDataHandler(myBar);
 
-                var html = self.directoryView.$el.find("#filterType").parent().html();
+                var html = self.directoryView.$("#filterType").parent().html();
                 expect( html.indexOf("bar") > -1).toBeTruthy();
                 expect(self.directoryView.render).not.toHaveBeenCalled();
                 expect(_.indexOf(self.directoryView.types, 'bar') > -1).toBeTruthy(); // bar should not be removed

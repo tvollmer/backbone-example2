@@ -48,8 +48,8 @@ define(function(require){
             // TODO : if you have multiple records in their Edit view, and you click save ( with a new type ), then it will be re-rendered, and your changes will be lost; one solution would be to only allow no more than 1 Contact to be in an Edit mode at a time.
             this.$el.html(this.editTemplate(this.model.toJSON()));
 
-            var nameElem = this.$el.find('.name');
-            var typeElem = this.$el.find('#type');
+            var nameElem = this.$('.name');
+            var typeElem = this.$('#type');
             var selectedTypeVal = typeElem.val().toLowerCase();
             typeElem.remove();
 
@@ -100,7 +100,7 @@ define(function(require){
 
                 $('<input />', {
                     'class': 'type'
-                }).insertAfter(this.$el.find('.name')).focus();
+                }).insertAfter(this.$('.name')).focus();
             }
         }
     });
