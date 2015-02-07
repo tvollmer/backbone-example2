@@ -5,6 +5,7 @@ define(function(require){
     var ContactView = require("view/ContactView");
     var Contact = require("model/Contact");
     var Forms = require("utils/Forms");
+    var StubEvent = require("spec/utils/StubEvent");
 
     describe("ContactView", function(){
 
@@ -35,19 +36,25 @@ define(function(require){
             sandbox.remove();
         });
 
+        function validateCommonFields(html){
+            var self = this;
+            var cm = self.contactModel;
+            expect( html ).toNotBe( "  " );
+            expect( html.indexOf(cm.get('photo')) > -1).toBeTruthy();
+            expect( html.indexOf(cm.get('name')) > -1).toBeTruthy();
+            expect( html.indexOf(cm.get('address')) > -1).toBeTruthy();
+            expect( html.indexOf(cm.get('tel')) > -1).toBeTruthy();
+            expect( html.indexOf(cm.get('email')) > -1).toBeTruthy();
+            expect( html.indexOf(cm.get('type')) > -1).toBeTruthy();
+        }
+
         describe("should be able to render values", function(){
+
 
             it("should start with rendered model within contactView, with no inputs", function(){
                 var self = this;
                 var html = self.contactView.$el.html();
-                expect( html ).toNotBe( "  " );
-                expect( html.indexOf("placeholder.png") > -1).toBeTruthy();
-                expect( html.indexOf("My Name") > -1).toBeTruthy();
-                expect( html.indexOf("my address") > -1).toBeTruthy();
-                expect( html.indexOf("98765433") > -1).toBeTruthy();
-                expect( html.indexOf("nomail@gmail.com") > -1).toBeTruthy();
-                expect( html.indexOf("friend") > -1).toBeTruthy();
-
+                validateCommonFields.call(this, html);
                 expect( html.indexOf("input") == -1).toBeTruthy();
             });
 
@@ -56,13 +63,7 @@ define(function(require){
                 self.contactView.editContactClickHandler();
 
                 var html = self.contactView.$el.html();
-                expect( html ).toNotBe( "  " );
-                expect( html.indexOf("placeholder.png") > -1).toBeTruthy();
-                expect( html.indexOf("My Name") > -1).toBeTruthy();
-                expect( html.indexOf("my address") > -1).toBeTruthy();
-                expect( html.indexOf("98765433") > -1).toBeTruthy();
-                expect( html.indexOf("nomail@gmail.com") > -1).toBeTruthy();
-                expect( html.indexOf("friend") > -1).toBeTruthy();
+                validateCommonFields.call(this, html);
 
                 expect( html.indexOf("input") > -1).toBeTruthy();
                 expect( html.indexOf("select") > -1).toBeTruthy();
@@ -73,28 +74,16 @@ define(function(require){
 
             it("should switch back to the initial view when the cancel button is clicked (even if the user changed a field)", function(){
                 var self = this;
-                var preventDefaultWasCalled = false;
-                var stubEvent = {
-                    preventDefault : function(){
-                        preventDefaultWasCalled = true;
-                        return false;
-                    }
-                };
+                var stubEvent = new StubEvent();
                 self.contactView.editContactClickHandler();
                 self.contactView.$(".name").val('Foo Name'); // simulate user change
                 self.contactView.cancelEditClickHandler(stubEvent);
 
                 var html = self.contactView.$el.html();
-                expect( html ).toNotBe( "  " );
-                expect( html.indexOf("placeholder.png") > -1).toBeTruthy();
-                expect( html.indexOf("My Name") > -1).toBeTruthy();
-                expect( html.indexOf("my address") > -1).toBeTruthy();
-                expect( html.indexOf("98765433") > -1).toBeTruthy();
-                expect( html.indexOf("nomail@gmail.com") > -1).toBeTruthy();
-                expect( html.indexOf("friend") > -1).toBeTruthy();
+                validateCommonFields.call(this, html);
 
                 expect( html.indexOf("input") == -1).toBeTruthy();
-                expect( preventDefaultWasCalled ).toBeTruthy();
+                expect( stubEvent.wasPreventDefaultWasCalled() ).toBeTruthy();
             });
 
         });
@@ -145,20 +134,12 @@ define(function(require){
 
         describe("should save the form inputs when the save button is clicked", function(){
 
-            var self = this;
-            var preventDefaultWasCalled = false;
-            var stubEvent = {
-                preventDefault : function(){
-                    preventDefaultWasCalled = true;
-                    return false;
-                }
-            };
-
             it("should prevent the default form submission from occurring", function(){
                 var self = this;
                 spyOn(self.contactModel, "save"); // don't want an actual save
+                var stubEvent = new StubEvent();
                 self.contactView.saveEditsClickHandler(stubEvent);
-                expect(preventDefaultWasCalled).toBeTruthy();
+                expect(stubEvent.wasPreventDefaultWasCalled()).toBeTruthy();
             });
 
             it("should call model.set", function(){
@@ -167,13 +148,7 @@ define(function(require){
                 spyOn(self.contactModel, "save"); // don't want an actual save
 
                 self.contactView.editContactClickHandler();
-                var stubEventWithTarget = {
-                    preventDefault : function(){
-                        preventDefaultWasCalled = true;
-                        return false;
-                    },
-                    target : self.contactView.$('.name')
-                };
+                var stubEventWithTarget = new StubEvent({target:self.contactView.$('.name')});
                 self.contactView.saveEditsClickHandler(stubEventWithTarget);
 
                 expect(self.contactModel.set).toHaveBeenCalledWith({
@@ -190,13 +165,7 @@ define(function(require){
                 spyOn(self.contactModel, "save");
 
                 self.contactView.editContactClickHandler();
-                var stubEventWithTarget = {
-                    preventDefault : function(){
-                        preventDefaultWasCalled = true;
-                        return false;
-                    },
-                    target : self.contactView.$('.name')
-                };
+                var stubEventWithTarget = new StubEvent({target:self.contactView.$('.name')});
                 self.contactView.saveEditsClickHandler(stubEventWithTarget);
 
                 expect(self.contactModel.save).toHaveBeenCalled();
@@ -206,7 +175,7 @@ define(function(require){
                 var self = this;
                 spyOn(self.contactView, "render");
                 spyOn(self.contactModel, "save"); // don't want an actual save
-                self.contactView.saveEditsClickHandler(stubEvent);
+                self.contactView.saveEditsClickHandler(new StubEvent());
                 expect(self.contactView.render).toHaveBeenCalled();
             });
 

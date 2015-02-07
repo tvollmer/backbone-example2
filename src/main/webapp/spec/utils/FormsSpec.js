@@ -3,6 +3,9 @@ define(function(require){
     'use strict';
 
     var Forms = require("utils/Forms");
+    var fooOption = '<option value="foo">foo</option>';
+    var fooBarOption = '<option value="foo">bar</option>';
+    var allOption = '<option value="all">All</option>';
 
     describe("Forms", function(){
 
@@ -21,13 +24,13 @@ define(function(require){
             it("should work with one arg", function(){
                 var self = this;
                 var option = self.formUtils.createOption("foo");
-                expect( option.wrap('<div>').parent().html() ).toBe( '<option value="foo">foo</option>' );
+                expect( option.wrap('<div>').parent().html() ).toBe( fooOption );
             });
 
             it("should work with two args", function(){
                 var self = this;
                 var option = self.formUtils.createOption("foo", "bar");
-                expect( option.wrap('<div>').parent().html() ).toBe( '<option value="foo">bar</option>' );
+                expect( option.wrap('<div>').parent().html() ).toBe( fooBarOption );
             });
 
         });
@@ -42,15 +45,15 @@ define(function(require){
             it("should work with one item in an array", function(){
                 var self = this;
                 var options = self.formUtils.createOptions(["foo"]);
-                expect( options[0].wrap('<div>').parent().html() ).toBe( '<option value="foo">foo</option>' );
+                expect( options[0].wrap('<div>').parent().html() ).toBe( fooOption );
             });
 
             it("should work with one item in an array and supplied initial items", function(){
                 var self = this;
-                var options = self.formUtils.createOptions(["foo"], [$('<option value="all">All</option>')]);
+                var options = self.formUtils.createOptions(["foo"], [$(allOption)]);
                 expect( options.length === 2).toBeTruthy();
-                expect( options[0].wrap('<div>').parent().html() ).toBe( '<option value="all">All</option>' );
-                expect( options[1].wrap('<div>').parent().html() ).toBe( '<option value="foo">foo</option>' );
+                expect( options[0].wrap('<div>').parent().html() ).toBe( allOption );
+                expect( options[1].wrap('<div>').parent().html() ).toBe( fooOption );
             });
 
         });
@@ -65,13 +68,13 @@ define(function(require){
             it("should work with one arg", function(){
                 var self = this;
                 var select = self.formUtils.createSelectOfItems(["foo"]);
-                expect( select.wrap('<div>').parent().html() ).toBe( '<select><option value="foo">foo</option></select>' );
+                expect( select.wrap('<div>').parent().html() ).toBe( '<select>'+fooOption+'</select>' );
             });
 
             it("should work with one item in an array and supplied initial html", function(){
                 var self = this;
-                var select = self.formUtils.createSelectOfItems(["foo"],{html: '<option value="all">All</option>'});
-                expect( select.wrap('<div>').parent().html() ).toBe( '<select><option value="all">All</option><option value="foo">foo</option></select>' );
+                var select = self.formUtils.createSelectOfItems(["foo"],{html: allOption});
+                expect( select.wrap('<div>').parent().html() ).toBe( '<select>'+allOption+fooOption+'</select>' );
             });
 
         });

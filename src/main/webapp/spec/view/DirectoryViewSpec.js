@@ -8,6 +8,7 @@ define(function(require){
     var Forms = require("utils/Forms");
     var Router = require("Router");
     var sandbox = $('#sandbox');
+    var StubEvent = require("spec/utils/StubEvent");
 
     describe("DirectoryView", function(){
 
@@ -120,19 +121,6 @@ define(function(require){
 
         describe("should handle UI implementations for changing views via dropdown", function(){
 
-            var preventDefaultWasCalled = false;
-            var stubEvent = {
-                preventDefault : function(){
-                    preventDefaultWasCalled = true;
-                    return false;
-                },
-
-                currentTarget : {
-                    value : "baz"
-                }
-
-            };
-
             var capturedJsonArgs = undefined;
             var stubCollection = {
                 fetch : function(jsonArgs){
@@ -152,7 +140,7 @@ define(function(require){
             it("should fire filterByType with the selected value", function(){
                 var self = this;
                 spyOn(self.directoryView, "filterByType");
-                self.directoryView.filterTypeChangeUIHandler(stubEvent);
+                self.directoryView.filterTypeChangeUIHandler(new StubEvent({currentTarget:{value:'baz'}}));
                 expect( self.directoryView.filterByType ).toHaveBeenCalledWith("baz");
             });
 
@@ -185,24 +173,38 @@ define(function(require){
 
         describe("should handle form actions properly", function(){
 
-            var preventDefaultWasCalled = false;
-            var stubEvent = {
-                preventDefault : function(){
-                    preventDefaultWasCalled = true;
-                    return false;
+            /**
+             * Override the save() impl at the class level with one that fires the done(Function) synchronously.
+             * Also prevents the real save() from trying to persist anything to our server. ;-)
+             * Also provides a way to grab a copy of the contact that was to be saved ... all for $19.99
+             *
+             * @returns {{done: Function}}
+             */
+            var contactThatWasAttemptedToBeSaved = undefined;
+            Contact.prototype.save = function(){
+
+                contactThatWasAttemptedToBeSaved = this;
+
+                var nonAsyncDone = function (implementationCallBack){
+                    implementationCallBack.call();
+                };
+
+                return {
+                    done: nonAsyncDone
                 }
             };
 
             it("the link's default behavior should be prevented", function(){
                 var self = this;
+                var stubEvent = new StubEvent();
                 self.directoryView.showFormClickUIHandler(stubEvent);
-                expect( preventDefaultWasCalled ).toBeTruthy();
+                expect( stubEvent.wasPreventDefaultWasCalled() ).toBeTruthy();
             });
 
             it("should show the form when the link is clicked", function(){
                 var self = this;
                 expect( self.directoryView.formIsVisible ).toBeFalsy();
-                self.directoryView.showFormClickUIHandler(stubEvent);
+                self.directoryView.showFormClickUIHandler(new StubEvent());
                 var addContactForm = self.directoryView.$('#addContact');
     //            console.log("and the form was ", addContactForm.wrap("<div>").parent().html());
                 waitsFor(function(){
@@ -212,57 +214,21 @@ define(function(require){
 
             it("should try to save the form values when the submit button is pressed, and once saved, should add it to the collection", function(){
                 var self = this;
-                /**
-                 * Override the save() impl at the class level with one that fires the done(Function) synchronously.
-                 * Also prevents the real save() from trying to persist anything to our server. ;-)
-                 *
-                 * @returns {{done: Function}}
-                 */
-                Contact.prototype.save = function(){
-
-                    var nonAsyncDone = function (implementationCallBack){
-                        implementationCallBack.call();
-                    };
-
-                    return {
-                        done: nonAsyncDone
-                    }
-                };
 
                 spyOn(self.directoryView.collection, "add");
-                self.directoryView.showFormClickUIHandler(stubEvent);
+                self.directoryView.showFormClickUIHandler(new StubEvent());
                 var addContactForm = self.directoryView.$('#addContact');
                 waitsFor(function(){
                     return addContactForm.css('display') !== 'none';
                 }, "the form to be visible", 500);
-                self.directoryView.addContactButtonClickHandler(stubEvent);
+                self.directoryView.addContactButtonClickHandler(new StubEvent());
                 expect( self.directoryView.collection.add ).toHaveBeenCalled();
             });
 
             it("should read the form values when the submit button is pressed, and try to save all of them with correct values", function(){
                 var self = this;
-                /**
-                 * Override the save() impl at the class level with one that fires the done(Function) synchronously.
-                 * Also prevents the real save() from trying to persist anything to our server. ;-)
-                 * Also provides a way to grab a copy of the contact that was to be saved ... all for $19.99
-                 *
-                 * @returns {{done: Function}}
-                 */
-                var contactThatWasAttemptedToBeSaved = undefined;
-                Contact.prototype.save = function(){
 
-                    contactThatWasAttemptedToBeSaved = this;
-
-                    var nonAsyncDone = function (implementationCallBack){
-                        implementationCallBack.call();
-                    };
-
-                    return {
-                        done: nonAsyncDone
-                    }
-                };
-
-                self.directoryView.showFormClickUIHandler(stubEvent);
+                self.directoryView.showFormClickUIHandler(new StubEvent());
                 var addContactForm = self.directoryView.$('#addContact');
                 waitsFor(function(){
                     return addContactForm.css('display') !== 'none';
@@ -275,7 +241,7 @@ define(function(require){
                 addContactForm.find("#tel").val(self.contactModel.get('tel'));
                 addContactForm.find("#email").val(self.contactModel.get('email'));
 
-                self.directoryView.addContactButtonClickHandler(stubEvent);
+                self.directoryView.addContactButtonClickHandler(new StubEvent());
 
     //            expect(contactThatWasAttemptedToBeSaved.get('photo')).toBe(self.contactModel.get('photo'));
                 expect(contactThatWasAttemptedToBeSaved.get('type')).toBe(self.contactModel.get('type'));
@@ -289,18 +255,10 @@ define(function(require){
 
         describe("should properly define collection data handlers", function(){
 
-            var preventDefaultWasCalled = false;
-            var stubEvent = {
-                preventDefault : function(){
-                    preventDefaultWasCalled = true;
-                    return false;
-                }
-            };
-
             it("collection reset handler should call render", function(){
                 var self = this;
                 spyOn(self.directoryView, "render");
-                self.directoryView.collectionResetDataHandler(stubEvent);
+                self.directoryView.collectionResetDataHandler(new StubEvent());
                 expect(self.directoryView.render).toHaveBeenCalled();
             });
 
