@@ -22,6 +22,7 @@ define(function(require){
         initialize: function(options){
 //            AbstractView.prototype.initialize.apply(self, arguments);
             this.selectOfTypes = options.selectOfTypes;
+            this.listenTo(this.model, 'destroy', this.modelDestroyDataHandler);
         },
 
         render: function () {
@@ -41,6 +42,9 @@ define(function(require){
 
         deleteContactClickHandler: function (event) {
             this.model.destroy();
+        },
+
+        modelDestroyDataHandler: function(model) {
             this.remove();
         },
 
