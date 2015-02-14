@@ -12,3 +12,7 @@ HotSwap ( not Hot Deploy )  w/ mvn/jetty/intellij
 3) Debug your new config
 4) make a change, and hit CTRL+SHIFT+F9 or command+shift+f9 ... you should see a little green box show up in the bottom
 
+Surefire ( passing -D args; thanks to Tatu Saloranta  )
+ mvn -T1.0C integration-test -DargLine=" -Xms256m -Xmx512m -Dlog4j.DEBUG -Dlog4j.configuration=file:/opt/java/log4j.properties "
+
+

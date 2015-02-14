@@ -37,7 +37,7 @@ public class ContactController {
     }
 
     @RequestMapping(method=GET)
-    public @ResponseBody List<Contact> findAllContactsByFilterType(@RequestParam("filterType") String filterType){
+    public @ResponseBody List<Contact> findAllContactsByFilterType(@RequestParam(value="filterType", defaultValue = "all") String filterType){
         log.debug("Start findAllContactsByFilterType");
         if (StringUtils.isEmpty(filterType) || "all".equals(filterType)){
             return new ArrayList<Contact>(contactData.values());

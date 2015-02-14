@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -46,14 +47,20 @@ public class ContactControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Contact 1"));
     }
 
-    // TODO : not currently able to test the default GET
-//    @Test
-//    public void shouldGetAllContacts() throws Exception {
-//        this.mockMvc.perform(get("/Contacts").accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType(APP_JSON_UTF8))
-//                .andExpect(jsonPath("$.name").value("Contact 1"));
-//    }
+    @Test
+    public void shouldGetAllContacts() throws Exception {
+        this.mockMvc.perform(get("/Contacts").accept(MediaType.APPLICATION_JSON))
+//                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APP_JSON_UTF8))
+                .andExpect(jsonPath("$[0].name").value("Contact 1"))
+                .andExpect(jsonPath("$[1].name").value("Contact 2"))
+                .andExpect(jsonPath("$[2].name").value("Contact 3"))
+                .andExpect(jsonPath("$[3].name").value("Contact 4"))
+                .andExpect(jsonPath("$[4].name").value("Contact 5"))
+                .andExpect(jsonPath("$[5].name").value("Contact 6"))
+                .andExpect(jsonPath("$[6].name").value("Contact 7"));
+    }
 
     @Test
     public void shouldGetTypes() throws Exception {
