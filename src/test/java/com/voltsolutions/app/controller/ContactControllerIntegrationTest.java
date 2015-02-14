@@ -26,6 +26,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 @ContextConfiguration(locations={"classpath:servlet-context.xml"})
 public class ContactControllerIntegrationTest {
 
+    private static final String APP_JSON_UTF8 = "application/json;charset=UTF-8";
+
     @Autowired
     private WebApplicationContext wac;
 
@@ -38,26 +40,26 @@ public class ContactControllerIntegrationTest {
 
     @Test
     public void shouldGetContactById() throws Exception {
-        this.mockMvc.perform(get("/Contacts/1").accept("application/json"))
+        this.mockMvc.perform(get("/Contacts/1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(content().contentType(APP_JSON_UTF8))
                 .andExpect(jsonPath("$.name").value("Contact 1"));
     }
 
     // TODO : not currently able to test the default GET
 //    @Test
 //    public void shouldGetAllContacts() throws Exception {
-//        this.mockMvc.perform(get("/Contacts").accept("application/json"))
+//        this.mockMvc.perform(get("/Contacts").accept(MediaType.APPLICATION_JSON))
 //                .andExpect(status().isOk())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andExpect(content().contentType(APP_JSON_UTF8))
 //                .andExpect(jsonPath("$.name").value("Contact 1"));
 //    }
 
     @Test
     public void shouldGetTypes() throws Exception {
-        this.mockMvc.perform(get("/Contacts/types").accept("application/json"))
+        this.mockMvc.perform(get("/Contacts/types").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(content().contentType(APP_JSON_UTF8))
                 .andExpect(content().string(containsString("friend")));
     }
 
@@ -66,9 +68,9 @@ public class ContactControllerIntegrationTest {
         Contact contact = new Contact().withId(3).withName("Contact 3").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("friend");
         Gson gson = new Gson();
         String contactAsJson = gson.toJson(contact);
-        this.mockMvc.perform(post("/Contacts").accept("application/json").content(contactAsJson).contentType(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(post("/Contacts").accept(MediaType.APPLICATION_JSON).content(contactAsJson).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"));
+                .andExpect(content().contentType(APP_JSON_UTF8));
     }
 
     @Test
@@ -76,16 +78,16 @@ public class ContactControllerIntegrationTest {
         Contact contact = new Contact().withId(3).withName("Contact 3").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("friend");
         Gson gson = new Gson();
         String contactAsJson = gson.toJson(contact);
-        this.mockMvc.perform(put("/Contacts/3").accept("application/json").content(contactAsJson).contentType(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(put("/Contacts/3").accept(MediaType.APPLICATION_JSON).content(contactAsJson).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"));
+                .andExpect(content().contentType(APP_JSON_UTF8));
     }
 
     @Test
     public void shouldDeleteContact() throws Exception {
-        this.mockMvc.perform(delete("/Contacts/3").accept("application/json"))
+        this.mockMvc.perform(delete("/Contacts/3").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"));
+                .andExpect(content().contentType(APP_JSON_UTF8));
     }
 
 }

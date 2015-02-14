@@ -25,7 +25,7 @@ public class ContactController {
     private Map<Integer, Contact> contactData = Maps.newHashMap();
 
     public ContactController(){
-        log.info("Creating ContactController, and pre-populating some data in the map.");
+        log.debug("Creating ContactController, and pre-populating some data in the map.");
         contactData.put(1, new Contact().withId(1).withName("Contact 1").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("family"));
         contactData.put(2, new Contact().withId(2).withName("Contact 2").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("family"));
         contactData.put(3, new Contact().withId(3).withName("Contact 3").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("friend"));
@@ -38,7 +38,7 @@ public class ContactController {
 
     @RequestMapping(method=GET)
     public @ResponseBody List<Contact> findAllContactsByFilterType(@RequestParam("filterType") String filterType){
-        log.info("Start findAllContactsByFilterType");
+        log.debug("Start findAllContactsByFilterType");
         if (StringUtils.isEmpty(filterType) || "all".equals(filterType)){
             return new ArrayList<Contact>(contactData.values());
         }
@@ -58,13 +58,13 @@ public class ContactController {
 
     @RequestMapping(value = "{id}", method = GET)
     public @ResponseBody Contact findContactById(@PathVariable("id") int contId){
-        log.info("Start findContactById. ID=%s", contId);
+        log.debug("Start findContactById. ID=" + contId);
         return contactData.get(contId);
     }
 
     @RequestMapping(method = POST)
     public @ResponseBody Contact saveContact(@RequestBody Contact contact){
-        log.info("Start saveContact");
+        log.debug("Start saveContact");
         Date now = new Date();
         int newId = Long.valueOf(now.getTime()).intValue();
         contact.withId(newId).withCreatedDate(now);
@@ -74,20 +74,20 @@ public class ContactController {
 
     @RequestMapping(value = "{id}", method=PUT)
     public @ResponseBody Contact updateContact(@RequestBody Contact contact){
-        log.info("Start updateContact");
+        log.debug("Start updateContact");
         contactData.put(contact.getId(), contact);
         return contact;
     }
 
     @RequestMapping(value = "{id}", method = DELETE)
     public @ResponseBody Contact removeContact(@PathVariable("id") int contactId){
-        log.info("Start removeContact");
+        log.debug("Start removeContact");
         return contactData.remove(contactId);
     }
 
     @RequestMapping(value = "types", method=GET)
     public @ResponseBody List<String> findAllContactTypes(){
-        log.info("Start findAllContactTypes");
+        log.debug("Start findAllContactTypes");
         Set<String> contactTypes = new HashSet<String>();
         for (Contact contact : contactData.values()){
             contactTypes.add(contact.getType().toLowerCase());
