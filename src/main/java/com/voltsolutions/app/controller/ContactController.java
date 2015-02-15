@@ -65,6 +65,10 @@ public class ContactController {
     @RequestMapping(method = POST)
     public @ResponseBody Contact saveContact(@RequestBody Contact contact){
         log.debug("Start saveContact");
+        Integer currentId = contact.getId();
+        if (currentId != null && contactData.containsKey(currentId)){
+            throw new RuntimeException("wtf exception; if you're trying to do an update, then call with a PUT, not a POST.");
+        }
         Date now = new Date();
         int newId = Long.valueOf(now.getTime()).intValue();
         contact.withId(newId).withCreatedDate(now);
@@ -75,6 +79,10 @@ public class ContactController {
     @RequestMapping(value = "{id}", method=PUT)
     public @ResponseBody Contact updateContact(@RequestBody Contact contact){
         log.debug("Start updateContact");
+        Integer currentId = contact.getId();
+        if (currentId == null || !contactData.containsKey(currentId)){
+            throw new RuntimeException("wtf exception; if you're trying to do an insert, then call with a POST, not a PUT.");
+        }
         contactData.put(contact.getId(), contact);
         return contact;
     }

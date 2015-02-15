@@ -53,13 +53,15 @@ public class ContactControllerIntegrationTest {
 //                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APP_JSON_UTF8))
-                .andExpect(jsonPath("$[0].name").value("Contact 1"))
-                .andExpect(jsonPath("$[1].name").value("Contact 2"))
-                .andExpect(jsonPath("$[2].name").value("Contact 3"))
-                .andExpect(jsonPath("$[3].name").value("Contact 4"))
-                .andExpect(jsonPath("$[4].name").value("Contact 5"))
-                .andExpect(jsonPath("$[5].name").value("Contact 6"))
-                .andExpect(jsonPath("$[6].name").value("Contact 7"));
+                .andExpect(jsonPath("$[?(@.id==1)].name").value("Contact 1"))
+                .andExpect(jsonPath("$[?(@.id==2)].name").value("Contact 2"))
+                .andExpect(jsonPath("$[?(@.id==3)].name").value("Contact 3"))
+//                .andExpect(jsonPath("$[?(@.id==4)].name").value("Contact 4")) // could be removed by a different test
+                .andExpect(jsonPath("$[?(@.id==5)].name").value("Contact 5"))
+                .andExpect(jsonPath("$[?(@.id==6)].name").value("Contact 6"))
+                .andExpect(jsonPath("$[?(@.id==7)].name").value("Contact 7"))
+                .andExpect(jsonPath("$[?(@.id==8)].name").value("Contact 8"))
+                ;
     }
 
     @Test
@@ -72,7 +74,7 @@ public class ContactControllerIntegrationTest {
 
     @Test
     public void shouldSaveContact() throws Exception {
-        Contact contact = new Contact().withId(3).withName("Contact 3").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("friend");
+        Contact contact = new Contact().withId(9).withName("Contact 9").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("friend");
         Gson gson = new Gson();
         String contactAsJson = gson.toJson(contact);
         this.mockMvc.perform(post("/Contacts").accept(MediaType.APPLICATION_JSON).content(contactAsJson).contentType(MediaType.APPLICATION_JSON))
@@ -92,7 +94,7 @@ public class ContactControllerIntegrationTest {
 
     @Test
     public void shouldDeleteContact() throws Exception {
-        this.mockMvc.perform(delete("/Contacts/3").accept(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(delete("/Contacts/4").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APP_JSON_UTF8));
     }
