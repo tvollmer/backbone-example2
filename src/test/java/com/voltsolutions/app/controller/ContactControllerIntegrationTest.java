@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,7 +25,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(locations={"classpath:servlet-context.xml"})
+@ContextHierarchy({
+    @ContextConfiguration(locations={"classpath:root-context.xml"}),
+    @ContextConfiguration(locations={"classpath:servlet-context.xml"})
+})
 public class ContactControllerIntegrationTest {
 
     private static final String APP_JSON_UTF8 = "application/json;charset=UTF-8";
@@ -82,6 +86,17 @@ public class ContactControllerIntegrationTest {
                 .andExpect(content().contentType(APP_JSON_UTF8));
     }
 
+//    @Test
+//    public void shouldNotSaveExistingContact() throws Exception {
+//        Contact contact = new Contact().withId(3).withName("Contact 3").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("friend");
+//        Gson gson = new Gson();
+//        String contactAsJson = gson.toJson(contact);
+//        this.mockMvc.perform(post("/Contacts").accept(MediaType.APPLICATION_JSON).content(contactAsJson).contentType(MediaType.APPLICATION_JSON))
+//                .andDo(MockMvcResultHandlers.print())
+//                .andExpect(status().isConflict())
+//                .andExpect(content().contentType(APP_JSON_UTF8));
+//    }
+
     @Test
     public void shouldUpdateContact() throws Exception {
         Contact contact = new Contact().withId(3).withName("Contact 3").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("friend");
@@ -91,6 +106,16 @@ public class ContactControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APP_JSON_UTF8));
     }
+
+//    @Test
+//    public void shouldNotUpdateContact() throws Exception {
+//        Contact contact = new Contact().withId(35).withName("Contact 35").withAddress("1, a street, a town, a city, AB12 3CD").withTel("0123456789").withEmail("anemail@me.com").withPhoto("img/placeholder.png").withType("friend");
+//        Gson gson = new Gson();
+//        String contactAsJson = gson.toJson(contact);
+//        this.mockMvc.perform(put("/Contacts/35").accept(MediaType.APPLICATION_JSON).content(contactAsJson).contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isConflict())
+//                .andExpect(content().contentType(APP_JSON_UTF8));
+//    }
 
     @Test
     public void shouldDeleteContact() throws Exception {
