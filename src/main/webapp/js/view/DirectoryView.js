@@ -61,6 +61,7 @@ define(function(require){
             var tmpl = _.template(self.template);
             self.$el.html(tmpl(props));
             self.renderContactTypeSelect();
+            self.renderContacts();
             self.$('#addContactFormWrapper').append(formHtml);
             return this;
         },
@@ -76,7 +77,6 @@ define(function(require){
                         self.renderContactTypeSelectOptions(self.types, [self.ALL_OPTION]);
                         contactTypeSelect.val(currentFilterType);
                         self.filterType = undefined;
-                        self.renderContacts();
                     });
             } else {
                 if ( contactTypeSelect.find('option').length === 0 ){
@@ -84,9 +84,7 @@ define(function(require){
                 }
                 contactTypeSelect.val(currentFilterType);
                 self.filterType = undefined;
-                self.renderContacts();
             }
-
         },
 
         renderContactTypeSelectOptions: function(items, initialOptionsArray){
@@ -139,6 +137,7 @@ define(function(require){
             var self = this;
             var filterType = e.currentTarget.value;
             self.filterByType(filterType);
+            self.formIsVisible = false;
         },
 
         /**

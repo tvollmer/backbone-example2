@@ -17,6 +17,15 @@ requirejs.config({
         'moment': '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min',
         'numeral': '//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min',
         'props': '../app/Properties?noext'
+    },
+    shim: {
+        underscore: {
+            exports: "_"
+        },
+        backbone: {
+            deps: ['underscore', 'jquery'],
+            exports: 'Backbone'
+        }
     }
 });
 
