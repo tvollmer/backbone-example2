@@ -4,7 +4,7 @@ define(function(require){
 
     var Backbone = require('backbone');
 
-    var BASE_URL = 'http://localhost:8080/backbone-example/app/Contacts';
+    var BASE_URL = 'app/Contacts';
     var Contact = require('model/Contact');
 
     var Directory = Backbone.Collection.extend({

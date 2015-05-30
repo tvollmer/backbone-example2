@@ -9,6 +9,7 @@ define(function(require){
     var ContactView = require('view/ContactView');
     var FormUtils = require('utils/Forms');
     var formHtml = require('text!template/addContactFormTemplate.html');
+    var props = JSON.parse(require('text!props'));
 
     var forms = new FormUtils();
 
@@ -57,7 +58,7 @@ define(function(require){
         render: function () {
             var self = this;
             var tmpl = _.template(self.template);
-            self.$el.html(tmpl({}));
+            self.$el.html(tmpl(props));
             self.renderContactTypeSelect();
             self.$('#addContactFormWrapper').append(formHtml);
             return this;

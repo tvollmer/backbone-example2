@@ -13,7 +13,10 @@ requirejs.config({
         'json2': '//cdnjs.cloudflare.com/ajax/libs/json2/20140204/json2.min',
         'underscore': '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min',
         'backbone': '//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone',
-        'text': '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.12/text'
+        'text': '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.12/text',
+        'moment': '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min',
+        'numeral': '//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min',
+        'props': '../app/Properties?noext'
     }
 });
 
