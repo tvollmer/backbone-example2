@@ -20,6 +20,7 @@ define(function(require){
         template: require('text!template/directoryViewTemplate.html'),
         childViews: [],
         types: [],
+        ALL_OPTION : '<option value="all">All</option>',
 
         initialize: function (options) {
             this.listenTo(this.collection, 'reset', this.collectionResetDataHandler);
@@ -67,30 +68,35 @@ define(function(require){
         renderContactTypeSelect: function(){
             var self = this;
             var contactTypeSelect = self.$('#filterType');
-            var contactTypeSelectOptions = contactTypeSelect.find('option');
             var currentFilterType = self.filterType || contactTypeSelect.val();
-            var allOption = '<option value="all">All</option>';
 
             if ( self.types.length === 0 ) {
-                $.getJSON(BASE_URL+'/types')
-                    .done(function(json){
+                self.collection.getAllTypes(function(json){
                         self.types = json;
-                        var options = forms.createOptions(self.types, [allOption]);
-                        contactTypeSelectOptions.remove().end().append(options);
+                        self.renderContactTypeSelectOptions(self.types, [self.ALL_OPTION]);
                         contactTypeSelect.val(currentFilterType);
                         self.filterType = undefined;
                         self.renderContacts();
                     });
             } else {
-                if ( contactTypeSelectOptions.length === 0 ){
-                    var options = forms.createOptions(self.types, [allOption]);
-                    contactTypeSelectOptions.remove().end().append(options);
+                if ( contactTypeSelect.find('option').length === 0 ){
+                    self.renderContactTypeSelectOptions(self.types, [self.ALL_OPTION]);
                 }
                 contactTypeSelect.val(currentFilterType);
                 self.filterType = undefined;
                 self.renderContacts();
             }
 
+        },
+
+        renderContactTypeSelectOptions: function(items, initialOptionsArray){
+            var self = this;
+
+            var contactTypeSelect = self.$('#filterType');
+            var contactTypeSelectOptions = contactTypeSelect.find('option');
+
+            var options = forms.createOptions(items, initialOptionsArray);
+            contactTypeSelectOptions.remove().end().append(options);
         },
 
         renderContacts: function(){
